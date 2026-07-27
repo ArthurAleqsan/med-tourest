@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-navy-900 antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+  }
+}
+
+@layer components {
+  .prose-basic h2 {
+    @apply mt-8 text-xl font-semibold text-navy-900;
+  }
+  .prose-basic p {
+    @apply mt-3 leading-relaxed text-navy-700;
+  }
+  .prose-basic ul {
+    @apply mt-3 list-disc space-y-1 pl-6 text-navy-700;
+  }
+}

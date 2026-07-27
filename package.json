@@ -1,0 +1,27 @@
+{
+  "name": "medical-tourism-armenia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Medical tourism platform for patients travelling to Armenia for medical treatment.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "predev": "npm run build -w @mta/shared",
+    "dev": "concurrently -n shared,api,web -c magenta,blue,green \"npm run dev -w @mta/shared\" \"npm run dev -w @mta/api\" \"npm run dev -w @mta/web\"",
+    "build": "npm run build -w @mta/shared && npm run build -w @mta/api && npm run build -w @mta/web",
+    "lint": "npm run lint -w @mta/shared && npm run lint -w @mta/api && npm run lint -w @mta/web",
+    "test": "npm run test -w @mta/shared && npm run test -w @mta/api && npm run test -w @mta/web",
+    "seed": "npm run seed -w @mta/api",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}
