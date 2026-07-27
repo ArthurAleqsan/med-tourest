@@ -15,9 +15,19 @@ export function createApp(): Express {
   app.set('trust proxy', 1);
 
   app.use(helmet());
+  const allowedOrigins = [env.CLIENT_URL, env.ADMIN_URL].filter(
+    (value): value is string => Boolean(value),
+  );
   app.use(
     cors({
-      origin: env.CLIENT_URL,
+      origin(origin, callback) {
+        // Allow non-browser clients (no Origin) and configured frontends.
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(new Error(`CORS blocked for origin: ${origin}`));
+      },
       credentials: true,
     }),
   );

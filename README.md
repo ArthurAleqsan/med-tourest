@@ -93,6 +93,7 @@ MONGODB_URI=mongodb://localhost:27017/medical-tourism-armenia
 JWT_SECRET=replace-with-a-secure-secret-at-least-32-characters-long
 JWT_EXPIRES_IN=1d
 CLIENT_URL=http://localhost:3000
+ADMIN_URL=http://localhost:5173
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=change-me-strong-password
 ADMIN_FIRST_NAME=Site
@@ -287,7 +288,7 @@ OpenAPI 3.0.3, every endpoint documented with summaries, query params, request b
 ## Security & privacy
 
 - All write endpoints validate input with Zod (shared schemas); strings are trimmed/sanitized.
-- Helmet, configured CORS (`CLIENT_URL`), and JSON body size limit (100 kb).
+- Helmet, configured CORS (`CLIENT_URL` + optional `ADMIN_URL`), and JSON body size limit (100 kb).
 - Public form endpoints and admin login are rate-limited (`express-rate-limit`).
 - Admin passwords hashed with bcrypt; password hashes are never returned.
 - Admin routes protected by JWT.
