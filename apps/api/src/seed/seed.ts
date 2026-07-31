@@ -9,6 +9,7 @@ import { Doctor } from '../models/Doctor';
 import { AdminUser } from '../models/AdminUser';
 import { slugify } from '../utils/slugify';
 import { seedCenters, seedDoctors, seedPackages, seedSpecialties } from './data';
+import { L, LA } from './localize';
 
 async function seedDatabase(): Promise<void> {
   await connectDatabase(env.MONGODB_URI);
@@ -24,7 +25,12 @@ async function seedDatabase(): Promise<void> {
   logger.info('Seeding specialties');
   const specialtyDocs = await Specialty.insertMany(
     seedSpecialties.map((s) => ({
-      ...s,
+      ...L('name', s.name),
+      ...L('shortDescription', s.shortDescription),
+      ...L('description', s.description),
+      ...LA('treatments', s.treatments),
+      icon: s.icon,
+      displayOrder: s.displayOrder,
       slug: slugify(s.name),
       isActive: true,
     })),
@@ -34,7 +40,16 @@ async function seedDatabase(): Promise<void> {
   logger.info('Seeding medical centers');
   const centerDocs = await MedicalCenter.insertMany(
     seedCenters.map((c) => ({
-      ...c,
+      ...L('name', c.name),
+      ...L('shortDescription', c.shortDescription),
+      ...L('description', c.description),
+      ...L('address', c.address),
+      ...L('city', c.city),
+      phone: c.phone,
+      email: c.email,
+      website: c.website,
+      photoUrl: c.photoUrl,
+      displayOrder: c.displayOrder,
       slug: slugify(c.name),
       isActive: true,
     })),
@@ -44,7 +59,26 @@ async function seedDatabase(): Promise<void> {
   logger.info('Seeding packages');
   const packageDocs = await Package.insertMany(
     seedPackages.map((p) => ({
-      ...p,
+      ...L('name', p.name),
+      ...L('shortDescription', p.shortDescription),
+      ...L('description', p.description),
+      durationDays: p.durationDays,
+      hotel: {
+        ...L('name', p.hotel.name),
+        stars: p.hotel.stars,
+        nights: p.hotel.nights,
+        ...(p.hotel.roomType ? L('roomType', p.hotel.roomType) : {}),
+        ...(p.hotel.description ? L('description', p.hotel.description) : {}),
+      },
+      tours: p.tours.map((tour) => ({
+        ...L('title', tour.title),
+        ...L('description', tour.description),
+      })),
+      ...LA('inclusions', p.inclusions),
+      priceFrom: p.priceFrom,
+      currency: p.currency,
+      photoUrl: p.photoUrl,
+      displayOrder: p.displayOrder,
       slug: slugify(p.name),
       isActive: true,
     })),
@@ -70,11 +104,11 @@ async function seedDatabase(): Promise<void> {
       specialty: specialtyId,
       centers: centerIds,
       photoUrl: d.photoUrl,
-      shortDescription: d.shortDescription,
-      biography: d.biography,
-      education: d.education,
-      certifications: d.certifications,
-      treatments: d.treatments,
+      ...L('shortDescription', d.shortDescription),
+      ...L('biography', d.biography),
+      ...LA('education', d.education),
+      ...LA('certifications', d.certifications),
+      ...LA('treatments', d.treatments),
       languages: d.languages,
       yearsOfExperience: d.yearsOfExperience,
       consultationPrice: d.consultationPrice,

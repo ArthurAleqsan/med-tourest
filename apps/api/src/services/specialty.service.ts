@@ -17,10 +17,11 @@ async function activeDoctorCounts(): Promise<Map<string, number>> {
 export async function listPublicSpecialties(query: SpecialtyListQuery): Promise<SpecialtyDto[]> {
   const filter: Record<string, unknown> = { isActive: true };
   if (query.search) {
-    filter.name = { $regex: query.search, $options: 'i' };
+    const rx = { $regex: query.search, $options: 'i' };
+    filter.$or = [{ en_name: rx }, { ru_name: rx }, { am_name: rx }];
   }
   const [docs, counts] = await Promise.all([
-    Specialty.find(filter).sort({ displayOrder: 1, name: 1 }).lean(),
+    Specialty.find(filter).sort({ displayOrder: 1, en_name: 1 }).lean(),
     activeDoctorCounts(),
   ]);
   return docs.map((doc) => toSpecialtyDto(doc, counts.get(String(doc._id)) ?? 0));
@@ -35,7 +36,7 @@ export async function getSpecialtyBySlug(slug: string): Promise<SpecialtyDto> {
 
 export async function listAllSpecialties(): Promise<SpecialtyDto[]> {
   const [docs, counts] = await Promise.all([
-    Specialty.find({}).sort({ displayOrder: 1, name: 1 }).lean(),
+    Specialty.find({}).sort({ displayOrder: 1, en_name: 1 }).lean(),
     activeDoctorCounts(),
   ]);
   return docs.map((doc) => toSpecialtyDto(doc, counts.get(String(doc._id)) ?? 0));
@@ -49,7 +50,7 @@ export async function getSpecialtyById(id: string): Promise<SpecialtyDto> {
 }
 
 export async function createSpecialty(input: SpecialtyInput): Promise<SpecialtyDto> {
-  const slug = await uniqueSlug(input.name, async (candidate) =>
+  const slug = await uniqueSlug(input.en_name, async (candidate) =>
     Boolean(await Specialty.exists({ slug: candidate })),
   );
   const doc = await Specialty.create({ ...input, slug });
@@ -62,13 +63,12 @@ export async function updateSpecialty(
 ): Promise<SpecialtyDto> {
   const existing = await Specialty.findById(id);
   if (!existing) throw ApiError.notFound('Specialty not found.');
-  if (input.name && input.name !== existing.name) {
-    existing.slug = await uniqueSlug(input.name, async (candidate) =>
+  if (input.en_name && input.en_name !== existing.en_name) {
+    existing.slug = await uniqueSlug(input.en_name, async (candidate) =>
       Boolean(await Specialty.exists({ slug: candidate, _id: { $ne: id } })),
     );
   }
   Object.assign(existing, input);
-  if (input.name) existing.name = input.name;
   await existing.save();
   return toSpecialtyDto(existing.toObject());
 }

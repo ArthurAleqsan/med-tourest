@@ -83,7 +83,7 @@ export default function AdminSpecialtiesPage() {
 
       {editing && (
         <AdminCard className="mb-6">
-          <h2 className="mb-4 text-lg font-semibold text-navy-900">Edit: {editing.name}</h2>
+          <h2 className="mb-4 text-lg font-semibold text-navy-900">Edit: {editing.en_name}</h2>
           <SpecialtyForm
             initial={editing}
             submitting={updateMutation.isPending}
@@ -127,7 +127,7 @@ export default function AdminSpecialtiesPage() {
                 {query.data.map((specialty) => (
                   <tr key={specialty.id} className="hover:bg-navy-50/50">
                     <td className="py-2.5 pr-4">{specialty.displayOrder}</td>
-                    <td className="py-2.5 pr-4 font-medium text-navy-900">{specialty.name}</td>
+                    <td className="py-2.5 pr-4 font-medium text-navy-900">{specialty.en_name}</td>
                     <td className="py-2.5 pr-4">{specialty.doctorCount ?? 0}</td>
                     <td className="py-2.5 pr-4">
                       <Badge tone={specialty.isActive ? 'green' : 'gray'}>
@@ -149,7 +149,7 @@ export default function AdminSpecialtiesPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            if (confirm(`Delete "${specialty.name}"?`)) {
+                            if (confirm(`Delete "${specialty.en_name}"?`)) {
                               deleteMutation.mutate(specialty.id);
                             }
                           }}

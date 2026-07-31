@@ -53,7 +53,7 @@ describe('Specialties', () => {
   it('retrieves a specialty by slug', async () => {
     const res = await request(app).get('/api/v1/specialties/cardiology');
     expect(res.status).toBe(200);
-    expect(res.body.data.name).toBe('Cardiology');
+    expect(res.body.data.en_name).toBe('Cardiology');
   });
 
   it('returns 404 for an unknown specialty', async () => {
@@ -118,7 +118,7 @@ describe('Medical centers', () => {
   it('retrieves a center by slug', async () => {
     const res = await request(app).get('/api/v1/centers/erebuni-medical-center');
     expect(res.status).toBe(200);
-    expect(res.body.data.city).toBe('Yerevan');
+    expect(res.body.data.en_city).toBe('Yerevan');
   });
 
   it('returns 404 for an unknown center', async () => {
@@ -139,9 +139,9 @@ describe('Packages', () => {
   it('retrieves a package by slug with hotel and tours', async () => {
     const res = await request(app).get('/api/v1/packages/10-day-dental-discovery-package');
     expect(res.status).toBe(200);
-    expect(res.body.data.hotel.name).toBe('Grand Hotel Yerevan');
-    expect(res.body.data.tours[0].title).toBe('Yerevan city tour');
-    expect(res.body.data.inclusions.length).toBeGreaterThan(0);
+    expect(res.body.data.hotel.en_name).toBe('Grand Hotel Yerevan');
+    expect(res.body.data.tours[0].en_title).toBe('Yerevan city tour');
+    expect(res.body.data.en_inclusions.length).toBeGreaterThan(0);
   });
 
   it('does not expose an inactive package', async () => {

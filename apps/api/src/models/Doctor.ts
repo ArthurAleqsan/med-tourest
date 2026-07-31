@@ -12,11 +12,21 @@ const doctorSchema = new Schema(
       index: true,
     },
     photoUrl: { type: String, trim: true },
-    shortDescription: { type: String, required: true, trim: true },
-    biography: { type: String, required: true, trim: true },
-    education: { type: [String], default: [] },
-    certifications: { type: [String], default: [] },
-    treatments: { type: [String], default: [] },
+    en_shortDescription: { type: String, required: true, trim: true },
+    ru_shortDescription: { type: String, required: true, trim: true },
+    am_shortDescription: { type: String, required: true, trim: true },
+    en_biography: { type: String, required: true, trim: true },
+    ru_biography: { type: String, required: true, trim: true },
+    am_biography: { type: String, required: true, trim: true },
+    en_education: { type: [String], default: [] },
+    ru_education: { type: [String], default: [] },
+    am_education: { type: [String], default: [] },
+    en_certifications: { type: [String], default: [] },
+    ru_certifications: { type: [String], default: [] },
+    am_certifications: { type: [String], default: [] },
+    en_treatments: { type: [String], default: [] },
+    ru_treatments: { type: [String], default: [] },
+    am_treatments: { type: [String], default: [] },
     languages: { type: [String], default: [], index: true },
     yearsOfExperience: { type: Number, required: true, min: 0 },
     consultationPrice: { type: Number, min: 0 },
@@ -27,7 +37,6 @@ const doctorSchema = new Schema(
   { timestamps: true },
 );
 
-// Text index to support name search.
 doctorSchema.index({ firstName: 'text', lastName: 'text' });
 
 export type DoctorDocument = InferSchemaType<typeof doctorSchema> & { _id: Types.ObjectId };

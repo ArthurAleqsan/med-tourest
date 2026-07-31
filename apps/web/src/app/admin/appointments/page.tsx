@@ -130,7 +130,7 @@ export default function AdminAppointmentsPage() {
                     <td className="py-2.5 pr-4">{appt.preferredDate}</td>
                     <td className="py-2.5 pr-4">
                       {appt.doctor?.fullName ?? '—'}
-                      <span className="block text-xs text-navy-500">{appt.specialty.name}</span>
+                      <span className="block text-xs text-navy-500">{appt.specialty.en_name}</span>
                     </td>
                     <td className="py-2.5 pr-4">{formatDate(appt.createdAt)}</td>
                     <td className="py-2.5">

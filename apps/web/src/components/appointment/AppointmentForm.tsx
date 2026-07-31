@@ -17,10 +17,12 @@ import { Field, Input, Select, Textarea } from '@/components/ui/form';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/feedback';
 import { useI18n } from '@/i18n/client';
+import { useLocalized } from '@/lib/useLocalized';
 import { AppointmentSuccess } from './AppointmentSuccess';
 
 export function AppointmentForm() {
   const { m, t } = useI18n();
+  const { loc } = useLocalized();
   const searchParams = useSearchParams();
   const doctorSlug = searchParams.get('doctor') ?? undefined;
   const doctorIdParam = searchParams.get('doctorId') ?? undefined;
@@ -159,7 +161,7 @@ export function AppointmentForm() {
             <option value="">{m.appointmentForm.selectSpecialty}</option>
             {specialtiesQuery.data?.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.name}
+                {loc(s, 'name')}
               </option>
             ))}
           </Select>

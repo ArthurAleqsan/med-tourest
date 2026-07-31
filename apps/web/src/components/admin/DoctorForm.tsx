@@ -9,11 +9,14 @@ import {
   arrayToLines,
   doctorFormSchema,
   linesToArray,
+  LOCALES,
+  LOCALE_SECTION_LABELS,
   type DoctorFormValues,
 } from '@/lib/adminForms';
 import { Field, Input, Select, Textarea } from '@/components/ui/form';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/feedback';
+import { LanguageSection } from '@/components/admin/ui';
 
 export function buildDoctorPayload(values: DoctorFormValues): DoctorInput {
   return {
@@ -22,11 +25,21 @@ export function buildDoctorPayload(values: DoctorFormValues): DoctorInput {
     specialty: values.specialty,
     centerIds: values.centerIds,
     photoUrl: values.photoUrl || undefined,
-    shortDescription: values.shortDescription,
-    biography: values.biography,
-    education: linesToArray(values.education ?? ''),
-    certifications: linesToArray(values.certifications ?? ''),
-    treatments: linesToArray(values.treatments ?? ''),
+    en_shortDescription: values.en_shortDescription,
+    ru_shortDescription: values.ru_shortDescription,
+    am_shortDescription: values.am_shortDescription,
+    en_biography: values.en_biography,
+    ru_biography: values.ru_biography,
+    am_biography: values.am_biography,
+    en_education: linesToArray(values.en_education ?? ''),
+    ru_education: linesToArray(values.ru_education ?? ''),
+    am_education: linesToArray(values.am_education ?? ''),
+    en_certifications: linesToArray(values.en_certifications ?? ''),
+    ru_certifications: linesToArray(values.ru_certifications ?? ''),
+    am_certifications: linesToArray(values.am_certifications ?? ''),
+    en_treatments: linesToArray(values.en_treatments ?? ''),
+    ru_treatments: linesToArray(values.ru_treatments ?? ''),
+    am_treatments: linesToArray(values.am_treatments ?? ''),
     languages: linesToArray(values.languages),
     yearsOfExperience: values.yearsOfExperience,
     consultationPrice:
@@ -36,6 +49,66 @@ export function buildDoctorPayload(values: DoctorFormValues): DoctorInput {
     consultationCurrency: values.consultationCurrency || undefined,
     isFeatured: values.isFeatured,
     isActive: values.isActive,
+  };
+}
+
+const emptyValues: DoctorFormValues = {
+  firstName: '',
+  lastName: '',
+  specialty: '',
+  centerIds: [],
+  photoUrl: '',
+  en_shortDescription: '',
+  ru_shortDescription: '',
+  am_shortDescription: '',
+  en_biography: '',
+  ru_biography: '',
+  am_biography: '',
+  en_education: '',
+  ru_education: '',
+  am_education: '',
+  en_certifications: '',
+  ru_certifications: '',
+  am_certifications: '',
+  en_treatments: '',
+  ru_treatments: '',
+  am_treatments: '',
+  languages: 'English',
+  yearsOfExperience: 0,
+  consultationPrice: '',
+  consultationCurrency: 'USD',
+  isFeatured: false,
+  isActive: true,
+};
+
+function toFormValues(initial: DoctorDto): DoctorFormValues {
+  return {
+    firstName: initial.firstName,
+    lastName: initial.lastName,
+    specialty: initial.specialty.id,
+    centerIds: initial.centers.map((c) => c.id),
+    photoUrl: initial.photoUrl ?? '',
+    en_shortDescription: initial.en_shortDescription,
+    ru_shortDescription: initial.ru_shortDescription,
+    am_shortDescription: initial.am_shortDescription,
+    en_biography: initial.en_biography,
+    ru_biography: initial.ru_biography,
+    am_biography: initial.am_biography,
+    en_education: arrayToLines(initial.en_education),
+    ru_education: arrayToLines(initial.ru_education),
+    am_education: arrayToLines(initial.am_education),
+    en_certifications: arrayToLines(initial.en_certifications),
+    ru_certifications: arrayToLines(initial.ru_certifications),
+    am_certifications: arrayToLines(initial.am_certifications),
+    en_treatments: arrayToLines(initial.en_treatments),
+    ru_treatments: arrayToLines(initial.ru_treatments),
+    am_treatments: arrayToLines(initial.am_treatments),
+    languages: arrayToLines(initial.languages),
+    yearsOfExperience: initial.yearsOfExperience,
+    consultationPrice: initial.consultationPrice ?? '',
+    consultationCurrency: initial.consultationCurrency ?? '',
+    isFeatured: initial.isFeatured,
+    isActive: initial.isActive,
   };
 }
 
@@ -60,43 +133,7 @@ export function DoctorForm({
     formState: { errors },
   } = useForm<DoctorFormValues>({
     resolver: zodResolver(doctorFormSchema),
-    defaultValues: initial
-      ? {
-          firstName: initial.firstName,
-          lastName: initial.lastName,
-          specialty: initial.specialty.id,
-          centerIds: initial.centers.map((c) => c.id),
-          photoUrl: initial.photoUrl ?? '',
-          shortDescription: initial.shortDescription,
-          biography: initial.biography,
-          education: arrayToLines(initial.education),
-          certifications: arrayToLines(initial.certifications),
-          treatments: arrayToLines(initial.treatments),
-          languages: arrayToLines(initial.languages),
-          yearsOfExperience: initial.yearsOfExperience,
-          consultationPrice: initial.consultationPrice ?? '',
-          consultationCurrency: initial.consultationCurrency ?? '',
-          isFeatured: initial.isFeatured,
-          isActive: initial.isActive,
-        }
-      : {
-          firstName: '',
-          lastName: '',
-          specialty: '',
-          centerIds: [],
-          photoUrl: '',
-          shortDescription: '',
-          biography: '',
-          education: '',
-          certifications: '',
-          treatments: '',
-          languages: 'English',
-          yearsOfExperience: 0,
-          consultationPrice: '',
-          consultationCurrency: 'USD',
-          isFeatured: false,
-          isActive: true,
-        },
+    defaultValues: initial ? toFormValues(initial) : emptyValues,
   });
 
   return (
@@ -120,7 +157,7 @@ export function DoctorForm({
           <option value="">Select a specialty</option>
           {specialtiesQuery.data?.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.name}
+              {s.en_name}
             </option>
           ))}
         </Select>
@@ -168,8 +205,8 @@ export function DoctorForm({
                       }}
                     />
                     <span className="min-w-0">
-                      <span className="truncate">{center.name}</span>
-                      <span className="text-navy-500"> · {center.city}</span>
+                      <span className="truncate">{center.en_name}</span>
+                      <span className="text-navy-500"> · {center.en_city}</span>
                     </span>
                   </label>
                 );
@@ -183,41 +220,53 @@ export function DoctorForm({
         <Input id="photoUrl" placeholder="https://..." {...register('photoUrl')} />
       </Field>
 
+      {LOCALES.map((lang) => (
+        <LanguageSection key={lang} title={LOCALE_SECTION_LABELS[lang]}>
+          <Field
+            label={`Short description (${lang.toUpperCase()})`}
+            htmlFor={`shortDescription-${lang}`}
+            required
+            error={errors[`${lang}_shortDescription`]?.message}
+          >
+            <Textarea
+              id={`shortDescription-${lang}`}
+              rows={2}
+              {...register(`${lang}_shortDescription`)}
+            />
+          </Field>
+          <Field
+            label={`Biography (${lang.toUpperCase()})`}
+            htmlFor={`biography-${lang}`}
+            required
+            error={errors[`${lang}_biography`]?.message}
+          >
+            <Textarea id={`biography-${lang}`} rows={5} {...register(`${lang}_biography`)} />
+          </Field>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label={`Education (${lang.toUpperCase()}, one per line)`} htmlFor={`education-${lang}`}>
+              <Textarea id={`education-${lang}`} rows={3} {...register(`${lang}_education`)} />
+            </Field>
+            <Field
+              label={`Certifications (${lang.toUpperCase()}, one per line)`}
+              htmlFor={`certifications-${lang}`}
+            >
+              <Textarea id={`certifications-${lang}`} rows={3} {...register(`${lang}_certifications`)} />
+            </Field>
+          </div>
+          <Field label={`Treatments (${lang.toUpperCase()}, one per line)`} htmlFor={`treatments-${lang}`}>
+            <Textarea id={`treatments-${lang}`} rows={3} {...register(`${lang}_treatments`)} />
+          </Field>
+        </LanguageSection>
+      ))}
+
       <Field
-        label="Short description"
-        htmlFor="shortDescription"
+        label="Languages (one per line)"
+        htmlFor="languages"
         required
-        error={errors.shortDescription?.message}
+        error={errors.languages?.message}
       >
-        <Textarea id="shortDescription" rows={2} {...register('shortDescription')} />
+        <Textarea id="languages" rows={3} {...register('languages')} />
       </Field>
-
-      <Field label="Biography" htmlFor="biography" required error={errors.biography?.message}>
-        <Textarea id="biography" rows={5} {...register('biography')} />
-      </Field>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Education (one per line)" htmlFor="education">
-          <Textarea id="education" rows={3} {...register('education')} />
-        </Field>
-        <Field label="Certifications (one per line)" htmlFor="certifications">
-          <Textarea id="certifications" rows={3} {...register('certifications')} />
-        </Field>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Treatments (one per line)" htmlFor="treatments">
-          <Textarea id="treatments" rows={3} {...register('treatments')} />
-        </Field>
-        <Field
-          label="Languages (one per line)"
-          htmlFor="languages"
-          required
-          error={errors.languages?.message}
-        >
-          <Textarea id="languages" rows={3} {...register('languages')} />
-        </Field>
-      </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
         <Field

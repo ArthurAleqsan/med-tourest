@@ -49,12 +49,20 @@ export interface PaginatedData<T> {
 
 export interface SpecialtyDto {
   id: string;
-  name: string;
+  en_name: string;
+  ru_name: string;
+  am_name: string;
   slug: string;
-  shortDescription: string;
-  description: string;
+  en_shortDescription: string;
+  ru_shortDescription: string;
+  am_shortDescription: string;
+  en_description: string;
+  ru_description: string;
+  am_description: string;
   icon?: string;
-  treatments: string[];
+  en_treatments: string[];
+  ru_treatments: string[];
+  am_treatments: string[];
   isActive: boolean;
   displayOrder: number;
   doctorCount?: number;
@@ -64,26 +72,44 @@ export interface SpecialtyDto {
 
 export interface DoctorSpecialtyRef {
   id: string;
-  name: string;
+  en_name: string;
+  ru_name: string;
+  am_name: string;
   slug: string;
 }
 
 export interface MedicalCenterRef {
   id: string;
-  name: string;
+  en_name: string;
+  ru_name: string;
+  am_name: string;
   slug: string;
-  city?: string;
-  address?: string;
+  en_city?: string;
+  ru_city?: string;
+  am_city?: string;
+  en_address?: string;
+  ru_address?: string;
+  am_address?: string;
 }
 
 export interface MedicalCenterDto {
   id: string;
-  name: string;
+  en_name: string;
+  ru_name: string;
+  am_name: string;
   slug: string;
-  shortDescription: string;
-  description: string;
-  address: string;
-  city: string;
+  en_shortDescription: string;
+  ru_shortDescription: string;
+  am_shortDescription: string;
+  en_description: string;
+  ru_description: string;
+  am_description: string;
+  en_address: string;
+  ru_address: string;
+  am_address: string;
+  en_city: string;
+  ru_city: string;
+  am_city: string;
   phone?: string;
   email?: string;
   website?: string;
@@ -96,28 +122,46 @@ export interface MedicalCenterDto {
 }
 
 export interface PackageTour {
-  title: string;
-  description: string;
+  en_title: string;
+  ru_title: string;
+  am_title: string;
+  en_description: string;
+  ru_description: string;
+  am_description: string;
 }
 
 export interface PackageHotel {
-  name: string;
+  en_name: string;
+  ru_name: string;
+  am_name: string;
   stars?: number;
-  roomType?: string;
+  en_roomType?: string;
+  ru_roomType?: string;
+  am_roomType?: string;
   nights?: number;
-  description?: string;
+  en_description?: string;
+  ru_description?: string;
+  am_description?: string;
 }
 
 export interface PackageDto {
   id: string;
-  name: string;
+  en_name: string;
+  ru_name: string;
+  am_name: string;
   slug: string;
   durationDays: number;
-  shortDescription: string;
-  description: string;
+  en_shortDescription: string;
+  ru_shortDescription: string;
+  am_shortDescription: string;
+  en_description: string;
+  ru_description: string;
+  am_description: string;
   hotel: PackageHotel;
   tours: PackageTour[];
-  inclusions: string[];
+  en_inclusions: string[];
+  ru_inclusions: string[];
+  am_inclusions: string[];
   priceFrom?: number;
   currency?: string;
   photoUrl?: string;
@@ -136,11 +180,21 @@ export interface DoctorDto {
   specialty: DoctorSpecialtyRef;
   centers: MedicalCenterRef[];
   photoUrl?: string;
-  shortDescription: string;
-  biography: string;
-  education: string[];
-  certifications: string[];
-  treatments: string[];
+  en_shortDescription: string;
+  ru_shortDescription: string;
+  am_shortDescription: string;
+  en_biography: string;
+  ru_biography: string;
+  am_biography: string;
+  en_education: string[];
+  ru_education: string[];
+  am_education: string[];
+  en_certifications: string[];
+  ru_certifications: string[];
+  am_certifications: string[];
+  en_treatments: string[];
+  ru_treatments: string[];
+  am_treatments: string[];
   languages: string[];
   yearsOfExperience: number;
   consultationPrice?: number;
@@ -155,7 +209,7 @@ export interface DoctorDto {
 export interface AppointmentRequestDto {
   id: string;
   referenceNumber: string;
-  doctor?: DoctorSpecialtyRef & { fullName: string };
+  doctor?: { id: string; fullName: string; slug: string };
   specialty: DoctorSpecialtyRef;
   preferredDate: string;
   preferredTimePeriod: PreferredTimePeriod;

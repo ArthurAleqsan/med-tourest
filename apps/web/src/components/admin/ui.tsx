@@ -43,3 +43,12 @@ export function AdminCard({ children, className }: { children: ReactNode; classN
     </div>
   );
 }
+
+export function LanguageSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <fieldset className="space-y-3 rounded-lg border border-navy-200 p-4">
+      <legend className="px-1 text-sm font-semibold text-navy-900">{title}</legend>
+      {children}
+    </fieldset>
+  );
+}

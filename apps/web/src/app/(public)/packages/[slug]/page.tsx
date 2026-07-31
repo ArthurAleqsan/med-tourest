@@ -11,6 +11,7 @@ import { LinkButton } from '@/components/ui/Button';
 import { buildMetadata } from '@/lib/seo';
 import { formatPrice } from '@/lib/utils';
 import { getTranslations } from '@/i18n/server';
+import { loc, locArray } from '@/lib/localized';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const { m, t } = getTranslations();
+  const { m, t, locale } = getTranslations();
   const pkg = await fetchPackage(params.slug);
   if (!pkg)
     return buildMetadata({
@@ -36,9 +37,11 @@ export async function generateMetadata({
       description: '',
       path: `/packages/${params.slug}`,
     });
+  const name = loc(pkg, 'name', locale);
+  const shortDescription = loc(pkg, 'shortDescription', locale);
   return buildMetadata({
-    title: t(m.meta.packageTitle, { name: pkg.name, days: pkg.durationDays }),
-    description: pkg.shortDescription,
+    title: t(m.meta.packageTitle, { name, days: pkg.durationDays }),
+    description: shortDescription,
     path: `/packages/${pkg.slug}`,
     images: pkg.photoUrl ? [pkg.photoUrl] : undefined,
   });
@@ -49,10 +52,18 @@ export default async function PackageDetailPage({ params }: { params: { slug: st
   const pkg = await fetchPackage(params.slug);
   if (!pkg) notFound();
 
+  const name = loc(pkg, 'name', locale);
+  const shortDescription = loc(pkg, 'shortDescription', locale);
+  const description = loc(pkg, 'description', locale);
+  const hotelName = loc(pkg.hotel, 'name', locale);
+  const hotelRoomType = loc(pkg.hotel, 'roomType', locale);
+  const hotelDescription = loc(pkg.hotel, 'description', locale);
+  const inclusions = locArray(pkg, 'inclusions', locale);
+
   const price = formatPrice(pkg.priceFrom, pkg.currency, locale);
   const hotelMeta = [
     pkg.hotel.stars ? t(m.packages.hotelStars, { stars: pkg.hotel.stars }) : null,
-    pkg.hotel.roomType || null,
+    hotelRoomType || null,
     pkg.hotel.nights != null
       ? t(m.packages.hotelNights, { nights: pkg.hotel.nights })
       : null,
@@ -69,22 +80,22 @@ export default async function PackageDetailPage({ params }: { params: { slug: st
             <span className="mx-2" aria-hidden="true">
               /
             </span>
-            <span className="text-navy-700">{pkg.name}</span>
+            <span className="text-navy-700">{name}</span>
           </nav>
 
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
             {pkg.photoUrl && (
               <img
                 src={pkg.photoUrl}
-                alt={pkg.name}
+                alt={name}
                 width={220}
                 height={132}
                 className="h-32 w-full max-w-xs rounded-2xl object-cover shadow-card sm:w-56"
               />
             )}
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy-900">{pkg.name}</h1>
-              <p className="mt-2 text-lg text-navy-700">{pkg.shortDescription}</p>
+              <h1 className="text-3xl font-bold tracking-tight text-navy-900">{name}</h1>
+              <p className="mt-2 text-lg text-navy-700">{shortDescription}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Badge tone="turquoise">
                   {t(m.packages.durationDays, { days: pkg.durationDays })}
@@ -100,19 +111,19 @@ export default async function PackageDetailPage({ params }: { params: { slug: st
         <div className="space-y-10">
           <section>
             <h2 className="text-lg font-semibold text-navy-900">{m.packages.about}</h2>
-            <p className="mt-3 leading-relaxed text-navy-700">{pkg.description}</p>
+            <p className="mt-3 leading-relaxed text-navy-700">{description}</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-navy-900">{m.packages.hotelTitle}</h2>
             <Card className="mt-4">
-              <h3 className="text-base font-semibold text-navy-900">{pkg.hotel.name}</h3>
+              <h3 className="text-base font-semibold text-navy-900">{hotelName}</h3>
               {hotelMeta.length > 0 && (
                 <p className="mt-1 text-sm text-brand-700">{hotelMeta.join(' · ')}</p>
               )}
-              {pkg.hotel.description && (
+              {hotelDescription && (
                 <p className="mt-3 text-sm leading-relaxed text-navy-700">
-                  {pkg.hotel.description}
+                  {hotelDescription}
                 </p>
               )}
             </Card>
@@ -122,25 +133,29 @@ export default async function PackageDetailPage({ params }: { params: { slug: st
             <section>
               <h2 className="text-lg font-semibold text-navy-900">{m.packages.toursTitle}</h2>
               <ul className="mt-4 space-y-3">
-                {pkg.tours.map((tour) => (
-                  <li key={tour.title}>
+                {pkg.tours.map((tour) => {
+                  const tourTitle = loc(tour, 'title', locale);
+                  const tourDescription = loc(tour, 'description', locale);
+                  return (
+                  <li key={tourTitle}>
                     <Card>
-                      <h3 className="font-semibold text-navy-900">{tour.title}</h3>
+                      <h3 className="font-semibold text-navy-900">{tourTitle}</h3>
                       <p className="mt-1.5 text-sm leading-relaxed text-navy-700">
-                        {tour.description}
+                        {tourDescription}
                       </p>
                     </Card>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </section>
           )}
 
-          {pkg.inclusions.length > 0 && (
+          {inclusions.length > 0 && (
             <section>
               <h2 className="text-lg font-semibold text-navy-900">{m.packages.inclusionsTitle}</h2>
               <ul className="mt-4 list-disc space-y-2 pl-5 text-navy-700">
-                {pkg.inclusions.map((item) => (
+                {inclusions.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
@@ -160,13 +175,13 @@ export default async function PackageDetailPage({ params }: { params: { slug: st
               </div>
               <div>
                 <dt className="font-medium text-navy-800">{m.packages.hotelSummaryLabel}</dt>
-                <dd className="text-navy-600">{pkg.hotel.name}</dd>
+                <dd className="text-navy-600">{hotelName}</dd>
               </div>
               <div>
                 <dt className="font-medium text-navy-800">{m.packages.toursSummaryLabel}</dt>
                 <dd className="text-navy-600">
                   {pkg.tours.length > 0
-                    ? pkg.tours.map((tour) => tour.title).join(', ')
+                    ? pkg.tours.map((tour) => loc(tour, 'title', locale)).join(', ')
                     : m.packages.noTours}
                 </dd>
               </div>

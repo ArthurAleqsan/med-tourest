@@ -2,33 +2,51 @@ import { Schema, model, Types, type Model, type InferSchemaType } from 'mongoose
 
 const tourSchema = new Schema(
   {
-    title: { type: String, required: true, trim: true },
-    description: { type: String, required: true, trim: true },
+    en_title: { type: String, required: true, trim: true },
+    ru_title: { type: String, required: true, trim: true },
+    am_title: { type: String, required: true, trim: true },
+    en_description: { type: String, required: true, trim: true },
+    ru_description: { type: String, required: true, trim: true },
+    am_description: { type: String, required: true, trim: true },
   },
   { _id: false },
 );
 
 const hotelSchema = new Schema(
   {
-    name: { type: String, required: true, trim: true },
+    en_name: { type: String, required: true, trim: true },
+    ru_name: { type: String, required: true, trim: true },
+    am_name: { type: String, required: true, trim: true },
     stars: { type: Number, min: 1, max: 5 },
-    roomType: { type: String, trim: true },
+    en_roomType: { type: String, trim: true },
+    ru_roomType: { type: String, trim: true },
+    am_roomType: { type: String, trim: true },
     nights: { type: Number, min: 0 },
-    description: { type: String, trim: true },
+    en_description: { type: String, trim: true },
+    ru_description: { type: String, trim: true },
+    am_description: { type: String, trim: true },
   },
   { _id: false },
 );
 
 const packageSchema = new Schema(
   {
-    name: { type: String, required: true, trim: true, index: true },
+    en_name: { type: String, required: true, trim: true, index: true },
+    ru_name: { type: String, required: true, trim: true },
+    am_name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     durationDays: { type: Number, required: true, min: 1, index: true },
-    shortDescription: { type: String, required: true, trim: true },
-    description: { type: String, required: true, trim: true },
+    en_shortDescription: { type: String, required: true, trim: true },
+    ru_shortDescription: { type: String, required: true, trim: true },
+    am_shortDescription: { type: String, required: true, trim: true },
+    en_description: { type: String, required: true, trim: true },
+    ru_description: { type: String, required: true, trim: true },
+    am_description: { type: String, required: true, trim: true },
     hotel: { type: hotelSchema, required: true },
     tours: { type: [tourSchema], default: [] },
-    inclusions: { type: [String], default: [] },
+    en_inclusions: { type: [String], default: [] },
+    ru_inclusions: { type: [String], default: [] },
+    am_inclusions: { type: [String], default: [] },
     priceFrom: { type: Number, min: 0 },
     currency: { type: String, trim: true, uppercase: true },
     photoUrl: { type: String, trim: true },

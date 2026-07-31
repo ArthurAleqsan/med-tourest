@@ -83,7 +83,7 @@ export default function AdminCentersPage() {
 
       {editing && (
         <AdminCard className="mb-6">
-          <h2 className="mb-4 text-lg font-semibold text-navy-900">Edit: {editing.name}</h2>
+          <h2 className="mb-4 text-lg font-semibold text-navy-900">Edit: {editing.en_name}</h2>
           <CenterForm
             initial={editing}
             submitting={updateMutation.isPending}
@@ -128,8 +128,8 @@ export default function AdminCentersPage() {
                 {query.data.map((center) => (
                   <tr key={center.id} className="hover:bg-navy-50/50">
                     <td className="py-2.5 pr-4">{center.displayOrder}</td>
-                    <td className="py-2.5 pr-4 font-medium text-navy-900">{center.name}</td>
-                    <td className="py-2.5 pr-4">{center.city}</td>
+                    <td className="py-2.5 pr-4 font-medium text-navy-900">{center.en_name}</td>
+                    <td className="py-2.5 pr-4">{center.en_city}</td>
                     <td className="py-2.5 pr-4">{center.doctorCount ?? 0}</td>
                     <td className="py-2.5 pr-4">
                       <Badge tone={center.isActive ? 'green' : 'gray'}>
@@ -151,7 +151,7 @@ export default function AdminCentersPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            if (confirm(`Delete "${center.name}"?`)) {
+                            if (confirm(`Delete "${center.en_name}"?`)) {
                               deleteMutation.mutate(center.id);
                             }
                           }}

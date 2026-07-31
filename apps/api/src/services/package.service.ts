@@ -13,9 +13,18 @@ export async function listPublicPackages(query: PackageListQuery): Promise<Packa
   const filter: Record<string, unknown> = { isActive: true };
   if (query.search) {
     const rx = { $regex: query.search, $options: 'i' };
-    filter.$or = [{ name: rx }, { shortDescription: rx }];
+    filter.$or = [
+      { en_name: rx },
+      { ru_name: rx },
+      { am_name: rx },
+      { en_shortDescription: rx },
+      { ru_shortDescription: rx },
+      { am_shortDescription: rx },
+    ];
   }
-  const docs = await Package.find(filter).sort({ displayOrder: 1, durationDays: 1, name: 1 }).lean();
+  const docs = await Package.find(filter)
+    .sort({ displayOrder: 1, durationDays: 1, en_name: 1 })
+    .lean();
   return docs.map((doc) => toPackageDto(doc));
 }
 
@@ -26,7 +35,9 @@ export async function getPackageBySlug(slug: string): Promise<PackageDto> {
 }
 
 export async function listAllPackages(): Promise<PackageDto[]> {
-  const docs = await Package.find({}).sort({ displayOrder: 1, durationDays: 1, name: 1 }).lean();
+  const docs = await Package.find({})
+    .sort({ displayOrder: 1, durationDays: 1, en_name: 1 })
+    .lean();
   return docs.map((doc) => toPackageDto(doc));
 }
 
@@ -37,7 +48,7 @@ export async function getPackageById(id: string): Promise<PackageDto> {
 }
 
 export async function createPackage(input: PackageInput): Promise<PackageDto> {
-  const slug = await uniqueSlug(input.name, async (candidate) =>
+  const slug = await uniqueSlug(input.en_name, async (candidate) =>
     Boolean(await Package.exists({ slug: candidate })),
   );
   const doc = await Package.create({ ...input, slug });
@@ -47,8 +58,8 @@ export async function createPackage(input: PackageInput): Promise<PackageDto> {
 export async function updatePackage(id: string, input: PackageUpdateInput): Promise<PackageDto> {
   const existing = await Package.findById(id);
   if (!existing) throw ApiError.notFound('Package not found.');
-  if (input.name && input.name !== existing.name) {
-    existing.slug = await uniqueSlug(input.name, async (candidate) =>
+  if (input.en_name && input.en_name !== existing.en_name) {
+    existing.slug = await uniqueSlug(input.en_name, async (candidate) =>
       Boolean(await Package.exists({ slug: candidate, _id: { $ne: id } })),
     );
   }

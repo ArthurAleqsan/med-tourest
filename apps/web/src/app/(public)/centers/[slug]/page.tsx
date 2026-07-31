@@ -12,6 +12,7 @@ import { DoctorCard } from '@/components/doctors/DoctorCard';
 import { EmptyState } from '@/components/ui/feedback';
 import { buildMetadata } from '@/lib/seo';
 import { getTranslations } from '@/i18n/server';
+import { loc } from '@/lib/localized';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const { m, t } = getTranslations();
+  const { m, t, locale } = getTranslations();
   const center = await fetchCenter(params.slug);
   if (!center)
     return buildMetadata({
@@ -46,19 +47,27 @@ export async function generateMetadata({
       description: '',
       path: `/centers/${params.slug}`,
     });
+  const name = loc(center, 'name', locale);
+  const city = loc(center, 'city', locale);
+  const shortDescription = loc(center, 'shortDescription', locale);
   return buildMetadata({
-    title: t(m.meta.centerTitle, { name: center.name, city: center.city }),
-    description: center.shortDescription,
+    title: t(m.meta.centerTitle, { name, city }),
+    description: shortDescription,
     path: `/centers/${center.slug}`,
     images: center.photoUrl ? [center.photoUrl] : undefined,
   });
 }
 
 export default async function CenterDetailPage({ params }: { params: { slug: string } }) {
-  const { m, t, plural } = getTranslations();
+  const { m, t, plural, locale } = getTranslations();
   const center = await fetchCenter(params.slug);
   if (!center) notFound();
   const doctors = await fetchCenterDoctors(params.slug);
+
+  const name = loc(center, 'name', locale);
+  const city = loc(center, 'city', locale);
+  const description = loc(center, 'description', locale);
+  const address = loc(center, 'address', locale);
 
   return (
     <>
@@ -71,22 +80,22 @@ export default async function CenterDetailPage({ params }: { params: { slug: str
             <span className="mx-2" aria-hidden="true">
               /
             </span>
-            <span className="text-navy-700">{center.name}</span>
+            <span className="text-navy-700">{name}</span>
           </nav>
 
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
             {center.photoUrl && (
               <img
                 src={center.photoUrl}
-                alt={center.name}
+                alt={name}
                 width={220}
                 height={132}
                 className="h-32 w-full max-w-xs rounded-2xl object-cover shadow-card sm:w-56"
               />
             )}
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy-900">{center.name}</h1>
-              <p className="mt-1 text-lg font-medium text-brand-700">{center.city}</p>
+              <h1 className="text-3xl font-bold tracking-tight text-navy-900">{name}</h1>
+              <p className="mt-1 text-lg font-medium text-brand-700">{city}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Badge tone="turquoise">
                   {plural(center.doctorCount ?? 0, m.centers.doctorCount)}
@@ -101,12 +110,12 @@ export default async function CenterDetailPage({ params }: { params: { slug: str
         <div className="space-y-8">
           <div>
             <h2 className="text-lg font-semibold text-navy-900">{m.centers.about}</h2>
-            <p className="mt-3 leading-relaxed text-navy-700">{center.description}</p>
+            <p className="mt-3 leading-relaxed text-navy-700">{description}</p>
           </div>
 
           <div>
             <h2 className="mb-6 text-2xl font-bold text-navy-900">
-              {t(m.centers.doctorsAt, { name: center.name })}
+              {t(m.centers.doctorsAt, { name })}
             </h2>
             {doctors.length === 0 ? (
               <EmptyState
@@ -130,7 +139,7 @@ export default async function CenterDetailPage({ params }: { params: { slug: str
             <dl className="mt-4 space-y-3 text-sm">
               <div>
                 <dt className="font-medium text-navy-800">{m.centers.addressLabel}</dt>
-                <dd className="text-navy-600">{center.address}</dd>
+                <dd className="text-navy-600">{address}</dd>
               </div>
               {center.phone && (
                 <div>

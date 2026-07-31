@@ -3,24 +3,90 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { MedicalCenterDto, MedicalCenterInput } from '@mta/shared';
-import { centerFormSchema, type CenterFormValues } from '@/lib/adminForms';
+import {
+  LOCALES,
+  LOCALE_SECTION_LABELS,
+  centerFormSchema,
+  type CenterFormValues,
+} from '@/lib/adminForms';
 import { Field, Input, Textarea } from '@/components/ui/form';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/feedback';
+import { LanguageSection } from '@/components/admin/ui';
 
 function buildPayload(values: CenterFormValues): MedicalCenterInput {
   return {
-    name: values.name,
-    shortDescription: values.shortDescription,
-    description: values.description,
-    address: values.address,
-    city: values.city,
+    en_name: values.en_name,
+    ru_name: values.ru_name,
+    am_name: values.am_name,
+    en_shortDescription: values.en_shortDescription,
+    ru_shortDescription: values.ru_shortDescription,
+    am_shortDescription: values.am_shortDescription,
+    en_description: values.en_description,
+    ru_description: values.ru_description,
+    am_description: values.am_description,
+    en_address: values.en_address,
+    ru_address: values.ru_address,
+    am_address: values.am_address,
+    en_city: values.en_city,
+    ru_city: values.ru_city,
+    am_city: values.am_city,
     phone: values.phone || undefined,
     email: values.email || undefined,
     website: values.website || undefined,
     photoUrl: values.photoUrl || undefined,
     displayOrder: values.displayOrder,
     isActive: values.isActive,
+  };
+}
+
+const emptyValues: CenterFormValues = {
+  en_name: '',
+  ru_name: '',
+  am_name: '',
+  en_shortDescription: '',
+  ru_shortDescription: '',
+  am_shortDescription: '',
+  en_description: '',
+  ru_description: '',
+  am_description: '',
+  en_address: '',
+  ru_address: '',
+  am_address: '',
+  en_city: '',
+  ru_city: '',
+  am_city: '',
+  phone: '',
+  email: '',
+  website: '',
+  photoUrl: '',
+  displayOrder: 0,
+  isActive: true,
+};
+
+function toFormValues(initial: MedicalCenterDto): CenterFormValues {
+  return {
+    en_name: initial.en_name,
+    ru_name: initial.ru_name,
+    am_name: initial.am_name,
+    en_shortDescription: initial.en_shortDescription,
+    ru_shortDescription: initial.ru_shortDescription,
+    am_shortDescription: initial.am_shortDescription,
+    en_description: initial.en_description,
+    ru_description: initial.ru_description,
+    am_description: initial.am_description,
+    en_address: initial.en_address,
+    ru_address: initial.ru_address,
+    am_address: initial.am_address,
+    en_city: initial.en_city,
+    ru_city: initial.ru_city,
+    am_city: initial.am_city,
+    phone: initial.phone ?? '',
+    email: initial.email ?? '',
+    website: initial.website ?? '',
+    photoUrl: initial.photoUrl ?? '',
+    displayOrder: initial.displayOrder,
+    isActive: initial.isActive,
   };
 }
 
@@ -43,60 +109,60 @@ export function CenterForm({
     formState: { errors },
   } = useForm<CenterFormValues>({
     resolver: zodResolver(centerFormSchema),
-    values: initial
-      ? {
-          name: initial.name,
-          shortDescription: initial.shortDescription,
-          description: initial.description,
-          address: initial.address,
-          city: initial.city,
-          phone: initial.phone ?? '',
-          email: initial.email ?? '',
-          website: initial.website ?? '',
-          photoUrl: initial.photoUrl ?? '',
-          displayOrder: initial.displayOrder,
-          isActive: initial.isActive,
-        }
-      : {
-          name: '',
-          shortDescription: '',
-          description: '',
-          address: '',
-          city: '',
-          phone: '',
-          email: '',
-          website: '',
-          photoUrl: '',
-          displayOrder: 0,
-          isActive: true,
-        },
+    values: initial ? toFormValues(initial) : emptyValues,
   });
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit((v) => onSubmit(buildPayload(v)))}>
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
-      <Field label="Name" htmlFor="c-name" required error={errors.name?.message}>
-        <Input id="c-name" {...register('name')} />
-      </Field>
-      <Field
-        label="Short description"
-        htmlFor="c-short"
-        required
-        error={errors.shortDescription?.message}
-      >
-        <Textarea id="c-short" rows={2} {...register('shortDescription')} />
-      </Field>
-      <Field label="Description" htmlFor="c-desc" required error={errors.description?.message}>
-        <Textarea id="c-desc" rows={4} {...register('description')} />
-      </Field>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Address" htmlFor="c-address" required error={errors.address?.message}>
-          <Input id="c-address" {...register('address')} />
-        </Field>
-        <Field label="City" htmlFor="c-city" required error={errors.city?.message}>
-          <Input id="c-city" {...register('city')} />
-        </Field>
-      </div>
+
+      {LOCALES.map((lang) => (
+        <LanguageSection key={lang} title={LOCALE_SECTION_LABELS[lang]}>
+          <Field
+            label={`Name (${lang.toUpperCase()})`}
+            htmlFor={`c-name-${lang}`}
+            required
+            error={errors[`${lang}_name`]?.message}
+          >
+            <Input id={`c-name-${lang}`} {...register(`${lang}_name`)} />
+          </Field>
+          <Field
+            label={`Short description (${lang.toUpperCase()})`}
+            htmlFor={`c-short-${lang}`}
+            required
+            error={errors[`${lang}_shortDescription`]?.message}
+          >
+            <Textarea id={`c-short-${lang}`} rows={2} {...register(`${lang}_shortDescription`)} />
+          </Field>
+          <Field
+            label={`Description (${lang.toUpperCase()})`}
+            htmlFor={`c-desc-${lang}`}
+            required
+            error={errors[`${lang}_description`]?.message}
+          >
+            <Textarea id={`c-desc-${lang}`} rows={4} {...register(`${lang}_description`)} />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label={`Address (${lang.toUpperCase()})`}
+              htmlFor={`c-address-${lang}`}
+              required
+              error={errors[`${lang}_address`]?.message}
+            >
+              <Input id={`c-address-${lang}`} {...register(`${lang}_address`)} />
+            </Field>
+            <Field
+              label={`City (${lang.toUpperCase()})`}
+              htmlFor={`c-city-${lang}`}
+              required
+              error={errors[`${lang}_city`]?.message}
+            >
+              <Input id={`c-city-${lang}`} {...register(`${lang}_city`)} />
+            </Field>
+          </div>
+        </LanguageSection>
+      ))}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Phone" htmlFor="c-phone" error={errors.phone?.message}>
           <Input id="c-phone" {...register('phone')} />

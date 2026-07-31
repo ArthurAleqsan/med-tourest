@@ -12,6 +12,7 @@ import { Alert, EmptyState } from '@/components/ui/feedback';
 import { Button } from '@/components/ui/Button';
 import { LANGUAGES, translateLanguage } from '@/lib/languages';
 import { useI18n } from '@/i18n/client';
+import { useLocalized } from '@/lib/useLocalized';
 
 const SORT_VALUES = ['experience_desc', 'experience_asc', 'name_asc', 'name_desc'] as const;
 
@@ -19,6 +20,7 @@ export function DoctorsBrowser() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { m, plural } = useI18n();
+  const { loc } = useLocalized();
 
   const specialty = searchParams.get('specialty') ?? '';
   const language = searchParams.get('language') ?? '';
@@ -123,7 +125,7 @@ export function DoctorsBrowser() {
               <option value="">{m.doctors.allSpecialties}</option>
               {specialtiesQuery.data?.map((s) => (
                 <option key={s.id} value={s.slug}>
-                  {s.name}
+                  {loc(s, 'name')}
                 </option>
               ))}
             </Select>
@@ -153,7 +155,7 @@ export function DoctorsBrowser() {
               <option value="">{m.doctors.allCenters}</option>
               {centersQuery.data?.map((c) => (
                 <option key={c.id} value={c.slug}>
-                  {c.name}
+                  {loc(c, 'name')}
                 </option>
               ))}
             </Select>

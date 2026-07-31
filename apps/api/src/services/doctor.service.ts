@@ -13,7 +13,11 @@ import { slugify, uniqueSlug } from '../utils/slugify';
 import { toDoctorDto } from '../utils/mappers';
 import { paginated } from '../utils/pagination';
 
-const CENTER_POPULATE = { path: 'centers', select: 'name slug city address' } as const;
+const SPECIALTY_POPULATE = 'en_name ru_name am_name slug' as const;
+const CENTER_POPULATE = {
+  path: 'centers',
+  select: 'en_name ru_name am_name slug en_city ru_city am_city en_address ru_address am_address',
+} as const;
 
 const SORT_MAP: Record<DoctorListQuery['sort'], Record<string, 1 | -1>> = {
   experience_desc: { yearsOfExperience: -1, lastName: 1 },
@@ -70,7 +74,7 @@ export async function listDoctors(query: DoctorListQuery): Promise<PaginatedData
 
   const [docs, totalItems] = await Promise.all([
     Doctor.find(filter)
-      .populate('specialty', 'name slug')
+      .populate('specialty', SPECIALTY_POPULATE)
       .populate(CENTER_POPULATE)
       .sort(SORT_MAP[query.sort])
       .skip(skip)
@@ -91,7 +95,7 @@ export async function listAllDoctors(
   const skip = (query.page - 1) * query.limit;
   const [docs, totalItems] = await Promise.all([
     Doctor.find(filter)
-      .populate('specialty', 'name slug')
+      .populate('specialty', SPECIALTY_POPULATE)
       .populate(CENTER_POPULATE)
       .sort(SORT_MAP[query.sort])
       .skip(skip)
@@ -104,7 +108,7 @@ export async function listAllDoctors(
 
 export async function getDoctorById(id: string): Promise<DoctorDto> {
   const doc = await Doctor.findById(id)
-    .populate('specialty', 'name slug')
+    .populate('specialty', SPECIALTY_POPULATE)
     .populate(CENTER_POPULATE)
     .lean();
   if (!doc) throw ApiError.notFound('Doctor not found.');
@@ -113,7 +117,7 @@ export async function getDoctorById(id: string): Promise<DoctorDto> {
 
 export async function listFeaturedDoctors(limit = 6): Promise<DoctorDto[]> {
   const docs = await Doctor.find({ isActive: true, isFeatured: true })
-    .populate('specialty', 'name slug')
+    .populate('specialty', SPECIALTY_POPULATE)
     .populate(CENTER_POPULATE)
     .sort({ yearsOfExperience: -1 })
     .limit(limit)
@@ -123,7 +127,7 @@ export async function listFeaturedDoctors(limit = 6): Promise<DoctorDto[]> {
 
 export async function getDoctorBySlug(slug: string): Promise<DoctorDto> {
   const doc = await Doctor.findOne({ slug, isActive: true })
-    .populate('specialty', 'name slug')
+    .populate('specialty', SPECIALTY_POPULATE)
     .populate(CENTER_POPULATE)
     .lean();
   if (!doc) throw ApiError.notFound('Doctor not found.');
@@ -138,7 +142,7 @@ export async function getRelatedDoctors(slug: string, limit = 3): Promise<Doctor
     specialty: doc.specialty,
     _id: { $ne: doc._id },
   })
-    .populate('specialty', 'name slug')
+    .populate('specialty', SPECIALTY_POPULATE)
     .populate(CENTER_POPULATE)
     .sort({ isFeatured: -1, yearsOfExperience: -1 })
     .limit(limit)
@@ -168,7 +172,7 @@ export async function createDoctor(input: DoctorInput): Promise<DoctorDto> {
   );
   const created = await Doctor.create({ ...rest, centers: centerIds, slug });
   const doc = await Doctor.findById(created._id)
-    .populate('specialty', 'name slug')
+    .populate('specialty', SPECIALTY_POPULATE)
     .populate(CENTER_POPULATE)
     .lean();
   return toDoctorDto(doc!);
@@ -195,7 +199,7 @@ export async function updateDoctor(id: string, input: DoctorUpdateInput): Promis
   if (centerIds) existing.set('centers', centerIds);
   await existing.save();
   const doc = await Doctor.findById(id)
-    .populate('specialty', 'name slug')
+    .populate('specialty', SPECIALTY_POPULATE)
     .populate(CENTER_POPULATE)
     .lean();
   return toDoctorDto(doc!);

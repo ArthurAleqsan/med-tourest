@@ -83,7 +83,7 @@ export default function AdminPackagesPage() {
 
       {editing && (
         <AdminCard className="mb-6">
-          <h2 className="mb-4 text-lg font-semibold text-navy-900">Edit: {editing.name}</h2>
+          <h2 className="mb-4 text-lg font-semibold text-navy-900">Edit: {editing.en_name}</h2>
           <PackageForm
             initial={editing}
             submitting={updateMutation.isPending}
@@ -129,9 +129,9 @@ export default function AdminPackagesPage() {
                 {query.data.map((pkg) => (
                   <tr key={pkg.id} className="hover:bg-navy-50/50">
                     <td className="py-2.5 pr-4">{pkg.displayOrder}</td>
-                    <td className="py-2.5 pr-4 font-medium text-navy-900">{pkg.name}</td>
+                    <td className="py-2.5 pr-4 font-medium text-navy-900">{pkg.en_name}</td>
                     <td className="py-2.5 pr-4">{pkg.durationDays} days</td>
-                    <td className="py-2.5 pr-4">{pkg.hotel.name}</td>
+                    <td className="py-2.5 pr-4">{pkg.hotel.en_name}</td>
                     <td className="py-2.5 pr-4">{pkg.tours.length}</td>
                     <td className="py-2.5 pr-4">
                       <Badge tone={pkg.isActive ? 'green' : 'gray'}>
@@ -153,7 +153,7 @@ export default function AdminPackagesPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            if (confirm(`Delete "${pkg.name}"?`)) {
+                            if (confirm(`Delete "${pkg.en_name}"?`)) {
                               deleteMutation.mutate(pkg.id);
                             }
                           }}

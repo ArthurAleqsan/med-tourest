@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/ui/feedback';
 import { SpecialtyIcon } from '@/components/ui/SpecialtyIcon';
 import { buildMetadata } from '@/lib/seo';
 import { getTranslations } from '@/i18n/server';
+import { loc, locArray } from '@/lib/localized';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const { m, t } = getTranslations();
+  const { m, t, locale } = getTranslations();
   const specialty = await fetchSpecialty(params.slug);
   if (!specialty)
     return buildMetadata({
@@ -37,17 +38,24 @@ export async function generateMetadata({
       description: '',
       path: `/specialties/${params.slug}`,
     });
+  const name = loc(specialty, 'name', locale);
+  const shortDescription = loc(specialty, 'shortDescription', locale);
   return buildMetadata({
-    title: t(m.meta.specialtyTitle, { name: specialty.name }),
-    description: specialty.shortDescription,
+    title: t(m.meta.specialtyTitle, { name }),
+    description: shortDescription,
     path: `/specialties/${specialty.slug}`,
   });
 }
 
 export default async function SpecialtyDetailPage({ params }: { params: { slug: string } }) {
-  const { m, t, plural } = getTranslations();
+  const { m, t, plural, locale } = getTranslations();
   const specialty = await fetchSpecialty(params.slug);
   if (!specialty) notFound();
+
+  const name = loc(specialty, 'name', locale);
+  const shortDescription = loc(specialty, 'shortDescription', locale);
+  const description = loc(specialty, 'description', locale);
+  const treatments = locArray(specialty, 'treatments', locale);
 
   let doctors: DoctorDto[] = [];
   try {
@@ -68,16 +76,16 @@ export default async function SpecialtyDetailPage({ params }: { params: { slug: 
             <span className="mx-2" aria-hidden="true">
               /
             </span>
-            <span className="text-navy-700">{specialty.name}</span>
+            <span className="text-navy-700">{name}</span>
           </nav>
           <div className="flex items-start gap-4">
             <SpecialtyIcon icon={specialty.icon} className="h-14 w-14 text-3xl" />
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">
-                {specialty.name}
+                {name}
               </h1>
               <p className="mt-3 max-w-2xl text-lg text-navy-600/80">
-                {specialty.shortDescription}
+                {shortDescription}
               </p>
               <Badge tone="turquoise" className="mt-4">
                 {plural(specialty.doctorCount ?? 0, m.specialtyDetail.doctorsAvailable)}
@@ -91,16 +99,16 @@ export default async function SpecialtyDetailPage({ params }: { params: { slug: 
         <div className="space-y-8">
           <div>
             <h2 className="text-xl font-semibold text-navy-900">{m.specialtyDetail.about}</h2>
-            <p className="mt-3 leading-relaxed text-navy-700">{specialty.description}</p>
+            <p className="mt-3 leading-relaxed text-navy-700">{description}</p>
           </div>
 
-          {specialty.treatments.length > 0 && (
+          {treatments.length > 0 && (
             <div>
               <h2 className="text-xl font-semibold text-navy-900">
                 {m.specialtyDetail.availableTreatments}
               </h2>
               <div className="mt-4 flex flex-wrap gap-2">
-                {specialty.treatments.map((treatment) => (
+                {treatments.map((treatment) => (
                   <Badge key={treatment} tone="brand" className="text-sm">
                     {treatment}
                   </Badge>
@@ -130,7 +138,7 @@ export default async function SpecialtyDetailPage({ params }: { params: { slug: 
       <section className="border-t border-navy-100 bg-navy-50/50 py-12">
         <Container>
           <h2 className="mb-8 text-2xl font-bold text-navy-900">
-            {t(m.specialtyDetail.doctorsIn, { name: specialty.name })}
+            {t(m.specialtyDetail.doctorsIn, { name })}
           </h2>
           {doctors.length === 0 ? (
             <EmptyState

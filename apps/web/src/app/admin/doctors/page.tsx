@@ -80,9 +80,9 @@ export default function AdminDoctorsPage() {
                 {query.data.data.map((doctor) => (
                   <tr key={doctor.id} className="hover:bg-navy-50/50">
                     <td className="py-2.5 pr-4 font-medium text-navy-900">Dr. {doctor.fullName}</td>
-                    <td className="py-2.5 pr-4">{doctor.specialty.name}</td>
+                    <td className="py-2.5 pr-4">{doctor.specialty.en_name}</td>
                     <td className="py-2.5 pr-4">
-                      {doctor.centers.map((c) => c.name).join(', ') || '—'}
+                      {doctor.centers.map((c) => c.en_name).join(', ') || '—'}
                     </td>
                     <td className="py-2.5 pr-4">
                       <div className="flex gap-1.5">

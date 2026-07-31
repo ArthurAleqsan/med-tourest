@@ -6,11 +6,15 @@ import { Badge } from '@/components/ui/Badge';
 import { LinkButton } from '@/components/ui/Button';
 import { formatPrice } from '@/lib/utils';
 import { useI18n } from '@/i18n/client';
+import { useLocalized } from '@/lib/useLocalized';
 import { translateLanguage } from '@/lib/languages';
 
 export function DoctorCard({ doctor }: { doctor: DoctorDto }) {
-  const { m, t, locale } = useI18n();
+  const { m, t } = useI18n();
+  const { locale, loc } = useLocalized();
   const price = formatPrice(doctor.consultationPrice, doctor.consultationCurrency, locale);
+  const specialtyName = loc(doctor.specialty, 'name');
+  const shortDescription = loc(doctor, 'shortDescription');
   const centers = doctor.centers ?? [];
   const primaryCenter = centers[0];
   const extraCenters = centers.length - 1;
@@ -30,10 +34,10 @@ export function DoctorCard({ doctor }: { doctor: DoctorDto }) {
           <h3 className="truncate text-lg font-semibold text-navy-900">
             {m.common.doctorPrefix} {doctor.fullName}
           </h3>
-          <p className="text-sm font-medium text-brand-700">{doctor.specialty.name}</p>
+          <p className="text-sm font-medium text-brand-700">{specialtyName}</p>
           {primaryCenter && (
             <p className="mt-0.5 truncate text-sm text-navy-600/80">
-              {primaryCenter.name}
+              {loc(primaryCenter, 'name')}
               {extraCenters > 0 && (
                 <span className="text-navy-500">
                   {' '}
@@ -45,7 +49,7 @@ export function DoctorCard({ doctor }: { doctor: DoctorDto }) {
         </div>
       </div>
 
-      <p className="mt-4 line-clamp-3 text-sm text-navy-700">{doctor.shortDescription}</p>
+      <p className="mt-4 line-clamp-3 text-sm text-navy-700">{shortDescription}</p>
 
       <div className="mt-4 flex flex-wrap gap-1.5">
         <Badge tone="turquoise">

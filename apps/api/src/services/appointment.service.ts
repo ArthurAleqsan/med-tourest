@@ -18,7 +18,7 @@ import { toAppointmentDto, toAppointmentPublicStatusDto } from '../utils/mappers
 import { paginated } from '../utils/pagination';
 
 const DOCTOR_REF_FIELDS = 'firstName lastName slug';
-const SPECIALTY_REF_FIELDS = 'name slug';
+const SPECIALTY_REF_FIELDS = 'en_name ru_name am_name slug';
 
 export async function createAppointmentRequest(
   input: AppointmentRequestInput,

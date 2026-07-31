@@ -24,10 +24,17 @@ export async function listPublicCenters(query: CenterListQuery): Promise<Medical
   const filter: Record<string, unknown> = { isActive: true };
   if (query.search) {
     const rx = { $regex: query.search, $options: 'i' };
-    filter.$or = [{ name: rx }, { city: rx }];
+    filter.$or = [
+      { en_name: rx },
+      { ru_name: rx },
+      { am_name: rx },
+      { en_city: rx },
+      { ru_city: rx },
+      { am_city: rx },
+    ];
   }
   const [docs, counts] = await Promise.all([
-    MedicalCenter.find(filter).sort({ displayOrder: 1, name: 1 }).lean(),
+    MedicalCenter.find(filter).sort({ displayOrder: 1, en_name: 1 }).lean(),
     activeDoctorCounts(),
   ]);
   return docs.map((doc) => toMedicalCenterDto(doc, counts.get(String(doc._id)) ?? 0));
@@ -42,7 +49,7 @@ export async function getCenterBySlug(slug: string): Promise<MedicalCenterDto> {
 
 export async function listAllCenters(): Promise<MedicalCenterDto[]> {
   const [docs, counts] = await Promise.all([
-    MedicalCenter.find({}).sort({ displayOrder: 1, name: 1 }).lean(),
+    MedicalCenter.find({}).sort({ displayOrder: 1, en_name: 1 }).lean(),
     activeDoctorCounts(),
   ]);
   return docs.map((doc) => toMedicalCenterDto(doc, counts.get(String(doc._id)) ?? 0));
@@ -56,7 +63,7 @@ export async function getCenterById(id: string): Promise<MedicalCenterDto> {
 }
 
 export async function createCenter(input: MedicalCenterInput): Promise<MedicalCenterDto> {
-  const slug = await uniqueSlug(input.name, async (candidate) =>
+  const slug = await uniqueSlug(input.en_name, async (candidate) =>
     Boolean(await MedicalCenter.exists({ slug: candidate })),
   );
   const doc = await MedicalCenter.create({ ...input, slug });
@@ -69,8 +76,8 @@ export async function updateCenter(
 ): Promise<MedicalCenterDto> {
   const existing = await MedicalCenter.findById(id);
   if (!existing) throw ApiError.notFound('Medical center not found.');
-  if (input.name && input.name !== existing.name) {
-    existing.slug = await uniqueSlug(input.name, async (candidate) =>
+  if (input.en_name && input.en_name !== existing.en_name) {
+    existing.slug = await uniqueSlug(input.en_name, async (candidate) =>
       Boolean(await MedicalCenter.exists({ slug: candidate, _id: { $ne: id } })),
     );
   }

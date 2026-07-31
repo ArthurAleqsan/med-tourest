@@ -95,7 +95,7 @@ export default function AdminAppointmentDetailPage({ params }: { params: { id: s
                 value={TIME_PERIOD_LABELS[query.data.preferredTimePeriod]}
               />
               <Row label="Doctor" value={query.data.doctor?.fullName} />
-              <Row label="Specialty" value={query.data.specialty.name} />
+              <Row label="Specialty" value={query.data.specialty.en_name} />
               <Row label="Submitted" value={formatDate(query.data.createdAt)} />
             </dl>
 

@@ -135,6 +135,15 @@ export const contactRequestInputSchema = z
 
 export type ContactRequestInput = z.infer<typeof contactRequestInputSchema>;
 
+const requiredShort = (max: number, min = 10) =>
+  sanitizedText(max).pipe(z.string().min(min, 'Text is too short.'));
+const requiredLong = (max: number, min = 20) =>
+  sanitizedText(max).pipe(z.string().min(min, 'Text is too short.'));
+const stringList = (itemMax: number, maxItems: number) =>
+  z.array(sanitizedString(itemMax, 1)).max(maxItems).default([]);
+const optionalText = (max: number) =>
+  sanitizedText(max).optional().or(z.literal('').transform(() => undefined));
+
 // ---------------------------------------------------------------------------
 // Admin: doctor
 // ---------------------------------------------------------------------------
@@ -148,11 +157,21 @@ export const doctorInputSchema = z.object({
     .min(1, 'Select at least one medical center.')
     .max(20, 'A doctor can be linked to at most 20 centers.'),
   photoUrl: z.string().trim().url('Photo URL must be a valid URL.').max(500).optional().or(z.literal('').transform(() => undefined)),
-  shortDescription: sanitizedText(280).pipe(z.string().min(10, 'Short description is too short.')),
-  biography: sanitizedText(4000).pipe(z.string().min(20, 'Biography is too short.')),
-  education: z.array(sanitizedString(200, 1)).max(20).default([]),
-  certifications: z.array(sanitizedString(200, 1)).max(20).default([]),
-  treatments: z.array(sanitizedString(120, 1)).max(40).default([]),
+  en_shortDescription: requiredShort(280, 10),
+  ru_shortDescription: requiredShort(280, 10),
+  am_shortDescription: requiredShort(280, 10),
+  en_biography: requiredLong(4000, 20),
+  ru_biography: requiredLong(4000, 20),
+  am_biography: requiredLong(4000, 20),
+  en_education: stringList(200, 20),
+  ru_education: stringList(200, 20),
+  am_education: stringList(200, 20),
+  en_certifications: stringList(200, 20),
+  ru_certifications: stringList(200, 20),
+  am_certifications: stringList(200, 20),
+  en_treatments: stringList(120, 40),
+  ru_treatments: stringList(120, 40),
+  am_treatments: stringList(120, 40),
   languages: z.array(sanitizedString(40, 1)).min(1, 'At least one language is required.').max(15),
   yearsOfExperience: z.number().int().min(0).max(70),
   consultationPrice: z.number().min(0).max(100000).optional(),
@@ -170,11 +189,19 @@ export type DoctorUpdateInput = z.infer<typeof doctorUpdateSchema>;
 // ---------------------------------------------------------------------------
 
 export const specialtyInputSchema = z.object({
-  name: sanitizedString(120, 2),
-  shortDescription: sanitizedText(280).pipe(z.string().min(10, 'Short description is too short.')),
-  description: sanitizedText(4000).pipe(z.string().min(20, 'Description is too short.')),
+  en_name: sanitizedString(120, 2),
+  ru_name: sanitizedString(120, 2),
+  am_name: sanitizedString(120, 2),
+  en_shortDescription: requiredShort(280, 10),
+  ru_shortDescription: requiredShort(280, 10),
+  am_shortDescription: requiredShort(280, 10),
+  en_description: requiredLong(4000, 20),
+  ru_description: requiredLong(4000, 20),
+  am_description: requiredLong(4000, 20),
   icon: sanitizedString(60).optional(),
-  treatments: z.array(sanitizedString(120, 1)).max(40).default([]),
+  en_treatments: stringList(120, 40),
+  ru_treatments: stringList(120, 40),
+  am_treatments: stringList(120, 40),
   isActive: z.boolean().default(true),
   displayOrder: z.number().int().min(0).max(9999).default(0),
 });
@@ -188,11 +215,21 @@ export type SpecialtyUpdateInput = z.infer<typeof specialtyUpdateSchema>;
 // ---------------------------------------------------------------------------
 
 export const medicalCenterInputSchema = z.object({
-  name: sanitizedString(160, 2),
-  shortDescription: sanitizedText(280).pipe(z.string().min(10, 'Short description is too short.')),
-  description: sanitizedText(4000).pipe(z.string().min(20, 'Description is too short.')),
-  address: sanitizedString(240, 3),
-  city: sanitizedString(120, 2),
+  en_name: sanitizedString(160, 2),
+  ru_name: sanitizedString(160, 2),
+  am_name: sanitizedString(160, 2),
+  en_shortDescription: requiredShort(280, 10),
+  ru_shortDescription: requiredShort(280, 10),
+  am_shortDescription: requiredShort(280, 10),
+  en_description: requiredLong(4000, 20),
+  ru_description: requiredLong(4000, 20),
+  am_description: requiredLong(4000, 20),
+  en_address: sanitizedString(240, 3),
+  ru_address: sanitizedString(240, 3),
+  am_address: sanitizedString(240, 3),
+  en_city: sanitizedString(120, 2),
+  ru_city: sanitizedString(120, 2),
+  am_city: sanitizedString(120, 2),
   phone: sanitizedString(FIELD_LIMITS.phoneNumber.max)
     .optional()
     .or(z.literal('').transform(() => undefined)),
@@ -224,30 +261,44 @@ export type MedicalCenterUpdateInput = z.infer<typeof medicalCenterUpdateSchema>
 // ---------------------------------------------------------------------------
 
 const packageTourSchema = z.object({
-  title: sanitizedString(160, 2),
-  description: sanitizedText(600).pipe(z.string().min(3, 'Tour description is too short.')),
+  en_title: sanitizedString(160, 2),
+  ru_title: sanitizedString(160, 2),
+  am_title: sanitizedString(160, 2),
+  en_description: requiredShort(600, 3),
+  ru_description: requiredShort(600, 3),
+  am_description: requiredShort(600, 3),
 });
 
 const packageHotelSchema = z.object({
-  name: sanitizedString(160, 2),
+  en_name: sanitizedString(160, 2),
+  ru_name: sanitizedString(160, 2),
+  am_name: sanitizedString(160, 2),
   stars: z.number().int().min(1).max(5).optional(),
-  roomType: sanitizedString(120)
-    .optional()
-    .or(z.literal('').transform(() => undefined)),
+  en_roomType: optionalText(120),
+  ru_roomType: optionalText(120),
+  am_roomType: optionalText(120),
   nights: z.number().int().min(0).max(90).optional(),
-  description: sanitizedText(1000)
-    .optional()
-    .or(z.literal('').transform(() => undefined)),
+  en_description: optionalText(1000),
+  ru_description: optionalText(1000),
+  am_description: optionalText(1000),
 });
 
 export const packageInputSchema = z.object({
-  name: sanitizedString(160, 2),
+  en_name: sanitizedString(160, 2),
+  ru_name: sanitizedString(160, 2),
+  am_name: sanitizedString(160, 2),
   durationDays: z.number().int().min(1, 'Duration must be at least 1 day.').max(90),
-  shortDescription: sanitizedText(280).pipe(z.string().min(10, 'Short description is too short.')),
-  description: sanitizedText(6000).pipe(z.string().min(20, 'Description is too short.')),
+  en_shortDescription: requiredShort(280, 10),
+  ru_shortDescription: requiredShort(280, 10),
+  am_shortDescription: requiredShort(280, 10),
+  en_description: requiredLong(6000, 20),
+  ru_description: requiredLong(6000, 20),
+  am_description: requiredLong(6000, 20),
   hotel: packageHotelSchema,
   tours: z.array(packageTourSchema).max(30).default([]),
-  inclusions: z.array(sanitizedString(160, 1)).max(40).default([]),
+  en_inclusions: stringList(160, 40),
+  ru_inclusions: stringList(160, 40),
+  am_inclusions: stringList(160, 40),
   priceFrom: z.number().min(0).max(1000000).optional(),
   currency: z.string().trim().length(3, 'Use a 3-letter ISO currency code.').toUpperCase().optional(),
   photoUrl: z

@@ -28,7 +28,7 @@ export async function getDashboardSummary(): Promise<AdminDashboardSummary> {
       status: { $in: ['new', 'contacted', 'pending_confirmation', 'confirmed'] },
     })
       .populate('doctor', 'firstName lastName')
-      .populate('specialty', 'name')
+      .populate('specialty', 'en_name')
       .sort({ preferredDate: 1 })
       .limit(10)
       .lean(),
@@ -36,14 +36,14 @@ export async function getDashboardSummary(): Promise<AdminDashboardSummary> {
 
   const upcomingAppointments = upcomingDocs.map((doc) => {
     const doctor = doc.doctor as unknown as { firstName?: string; lastName?: string } | null;
-    const specialty = doc.specialty as unknown as { name?: string } | null;
+    const specialty = doc.specialty as unknown as { en_name?: string } | null;
     return {
       id: String(doc._id),
       referenceNumber: doc.referenceNumber,
       preferredDate: storageDateToDateOnly(doc.preferredDate),
       doctorName:
         doctor && doctor.firstName ? `${doctor.firstName} ${doctor.lastName ?? ''}`.trim() : undefined,
-      specialtyName: specialty?.name ?? '',
+      specialtyName: specialty?.en_name ?? '',
       status: doc.status,
     };
   });

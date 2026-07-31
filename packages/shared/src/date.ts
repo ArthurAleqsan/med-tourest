@@ -1,4 +1,3 @@
-import { formatInTimeZone } from 'date-fns-tz';
 import { APPOINTMENT_MAX_MONTHS_AHEAD, BUSINESS_TIMEZONE } from './constants';
 
 /**
@@ -20,6 +19,24 @@ import { APPOINTMENT_MAX_MONTHS_AHEAD, BUSINESS_TIMEZONE } from './constants';
 
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
+/** Formats a Date as "yyyy-MM-dd" in the given IANA timezone (no date-fns). */
+function formatDateOnlyInTimeZone(date: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+
+  const year = parts.find((p) => p.type === 'year')?.value;
+  const month = parts.find((p) => p.type === 'month')?.value;
+  const day = parts.find((p) => p.type === 'day')?.value;
+  if (!year || !month || !day) {
+    throw new Error(`Unable to format date in timezone ${timeZone}`);
+  }
+  return `${year}-${month}-${day}`;
+}
+
 export interface AppointmentDateRange {
   /** Earliest selectable calendar date (tomorrow, Yerevan) as "yyyy-MM-dd". */
   min: string;
@@ -29,7 +46,7 @@ export interface AppointmentDateRange {
 
 /** Returns the current calendar date in the business timezone as "yyyy-MM-dd". */
 export function getBusinessToday(now: Date = new Date()): string {
-  return formatInTimeZone(now, BUSINESS_TIMEZONE, 'yyyy-MM-dd');
+  return formatDateOnlyInTimeZone(now, BUSINESS_TIMEZONE);
 }
 
 function parseDateOnly(value: string): { year: number; month: number; day: number } {
@@ -38,7 +55,7 @@ function parseDateOnly(value: string): { year: number; month: number; day: numbe
 }
 
 function formatUtc(date: Date): string {
-  return formatInTimeZone(date, 'UTC', 'yyyy-MM-dd');
+  return formatDateOnlyInTimeZone(date, 'UTC');
 }
 
 function dateOnlyToUtc({ year, month, day }: { year: number; month: number; day: number }): Date {
@@ -65,7 +82,9 @@ export function addMonthsToDateOnly(value: string, months: number): string {
     Date.UTC(firstOfTarget.getUTCFullYear(), firstOfTarget.getUTCMonth() + 1, 0),
   ).getUTCDate();
   const clampedDay = Math.min(day, lastDayOfTarget);
-  return formatUtc(new Date(Date.UTC(firstOfTarget.getUTCFullYear(), firstOfTarget.getUTCMonth(), clampedDay)));
+  return formatUtc(
+    new Date(Date.UTC(firstOfTarget.getUTCFullYear(), firstOfTarget.getUTCMonth(), clampedDay)),
+  );
 }
 
 /**

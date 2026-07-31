@@ -14,6 +14,7 @@ import { formatPrice } from '@/lib/utils';
 import { translateLanguage } from '@/lib/languages';
 import { SITE_URL } from '@/lib/config';
 import { getTranslations } from '@/i18n/server';
+import { loc, locArray } from '@/lib/localized';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const { m, t } = getTranslations();
+  const { m, t, locale } = getTranslations();
   const result = await fetchDoctor(params.slug);
   if (!result)
     return buildMetadata({
@@ -42,27 +43,29 @@ export async function generateMetadata({
       path: `/doctors/${params.slug}`,
     });
   const { doctor } = result;
+  const specialtyName = loc(doctor.specialty, 'name', locale);
+  const shortDescription = loc(doctor, 'shortDescription', locale);
   return buildMetadata({
-    title: t(m.meta.doctorTitle, { name: doctor.fullName, specialty: doctor.specialty.name }),
-    description: doctor.shortDescription,
+    title: t(m.meta.doctorTitle, { name: doctor.fullName, specialty: specialtyName }),
+    description: shortDescription,
     path: `/doctors/${doctor.slug}`,
     images: doctor.photoUrl ? [doctor.photoUrl] : undefined,
   });
 }
 
-function physicianJsonLd(doctor: DoctorDto) {
+function physicianJsonLd(doctor: DoctorDto, locale: Parameters<typeof loc>[2]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Physician',
     name: `Dr. ${doctor.fullName}`,
-    medicalSpecialty: doctor.specialty.name,
+    medicalSpecialty: loc(doctor.specialty, 'name', locale),
     image: doctor.photoUrl,
     url: `${SITE_URL}/doctors/${doctor.slug}`,
     knowsLanguage: doctor.languages,
     worksFor: doctor.centers.map((center) => ({
       '@type': 'MedicalOrganization',
-      name: center.name,
-      address: center.address,
+      name: loc(center, 'name', locale),
+      address: loc(center, 'address', locale),
     })),
   };
 }
@@ -92,12 +95,17 @@ export default async function DoctorProfilePage({ params }: { params: { slug: st
   if (!result) notFound();
   const { doctor, related } = result;
   const price = formatPrice(doctor.consultationPrice, doctor.consultationCurrency, locale);
+  const specialtyName = loc(doctor.specialty, 'name', locale);
+  const biography = loc(doctor, 'biography', locale);
+  const treatments = locArray(doctor, 'treatments', locale);
+  const education = locArray(doctor, 'education', locale);
+  const certifications = locArray(doctor, 'certifications', locale);
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(physicianJsonLd(doctor)) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(physicianJsonLd(doctor, locale)) }}
       />
 
       <div className="border-b border-navy-100 bg-gradient-to-b from-brand-50/60 to-white">
@@ -126,10 +134,10 @@ export default async function DoctorProfilePage({ params }: { params: { slug: st
               <h1 className="text-3xl font-bold tracking-tight text-navy-900">
                 {m.common.doctorPrefix} {doctor.fullName}
               </h1>
-              <p className="mt-1 text-lg font-medium text-brand-700">{doctor.specialty.name}</p>
+              <p className="mt-1 text-lg font-medium text-brand-700">{specialtyName}</p>
               {doctor.centers[0] && (
                 <p className="text-navy-600">
-                  {doctor.centers.map((c) => c.name).join(' · ')}
+                  {doctor.centers.map((c) => loc(c, 'name', locale)).join(' · ')}
                 </p>
               )}
               <div className="mt-3 flex flex-wrap gap-2">
@@ -151,11 +159,11 @@ export default async function DoctorProfilePage({ params }: { params: { slug: st
         <div className="space-y-8">
           <div>
             <h2 className="text-lg font-semibold text-navy-900">{m.doctorProfile.about}</h2>
-            <p className="mt-3 leading-relaxed text-navy-700">{doctor.biography}</p>
+            <p className="mt-3 leading-relaxed text-navy-700">{biography}</p>
           </div>
-          <DetailList title={m.doctorProfile.treatments} items={doctor.treatments} />
-          <DetailList title={m.doctorProfile.education} items={doctor.education} />
-          <DetailList title={m.doctorProfile.certifications} items={doctor.certifications} />
+          <DetailList title={m.doctorProfile.treatments} items={treatments} />
+          <DetailList title={m.doctorProfile.education} items={education} />
+          <DetailList title={m.doctorProfile.certifications} items={certifications} />
 
           {doctor.centers.length > 0 && (
             <div>
@@ -163,7 +171,11 @@ export default async function DoctorProfilePage({ params }: { params: { slug: st
                 {m.doctorProfile.centersTitle}
               </h2>
               <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-                {doctor.centers.map((center) => (
+                {doctor.centers.map((center) => {
+                  const centerName = loc(center, 'name', locale);
+                  const centerCity = loc(center, 'city', locale);
+                  const centerAddress = loc(center, 'address', locale);
+                  return (
                   <li
                     key={center.id}
                     className="rounded-xl border border-navy-100 bg-white p-4 shadow-card"
@@ -172,11 +184,11 @@ export default async function DoctorProfilePage({ params }: { params: { slug: st
                       href={`/centers/${center.slug}`}
                       className="font-semibold text-navy-900 hover:text-brand-700"
                     >
-                      {center.name}
+                      {centerName}
                     </Link>
-                    {center.city && <p className="text-sm text-navy-600">{center.city}</p>}
-                    {center.address && (
-                      <p className="mt-1 text-sm text-navy-500">{center.address}</p>
+                    {centerCity && <p className="text-sm text-navy-600">{centerCity}</p>}
+                    {centerAddress && (
+                      <p className="mt-1 text-sm text-navy-500">{centerAddress}</p>
                     )}
                     <Link
                       href={`/centers/${center.slug}`}
@@ -185,7 +197,8 @@ export default async function DoctorProfilePage({ params }: { params: { slug: st
                       {m.doctorProfile.viewCenter}
                     </Link>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </div>
           )}
