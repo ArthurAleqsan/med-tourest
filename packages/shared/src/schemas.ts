@@ -144,6 +144,15 @@ const stringList = (itemMax: number, maxItems: number) =>
 const optionalText = (max: number) =>
   sanitizedText(max).optional().or(z.literal('').transform(() => undefined));
 
+/** URL slug: lowercase letters, numbers, hyphens. */
+export const slugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use a URL slug like my-center-name (lowercase letters, numbers, hyphens).')
+  .min(2, 'Slug must be at least 2 characters.')
+  .max(80, 'Slug must be at most 80 characters.');
+
 // ---------------------------------------------------------------------------
 // Admin: doctor
 // ---------------------------------------------------------------------------
@@ -151,6 +160,7 @@ const optionalText = (max: number) =>
 export const doctorInputSchema = z.object({
   firstName: sanitizedString(FIELD_LIMITS.firstName.max, FIELD_LIMITS.firstName.min),
   lastName: sanitizedString(FIELD_LIMITS.lastName.max, FIELD_LIMITS.lastName.min),
+  slug: slugSchema,
   specialty: objectIdSchema,
   centerIds: z
     .array(objectIdSchema)
@@ -192,6 +202,7 @@ export const specialtyInputSchema = z.object({
   en_name: sanitizedString(120, 2),
   ru_name: sanitizedString(120, 2),
   am_name: sanitizedString(120, 2),
+  slug: slugSchema,
   en_shortDescription: requiredShort(280, 10),
   ru_shortDescription: requiredShort(280, 10),
   am_shortDescription: requiredShort(280, 10),
@@ -218,6 +229,7 @@ export const medicalCenterInputSchema = z.object({
   en_name: sanitizedString(160, 2),
   ru_name: sanitizedString(160, 2),
   am_name: sanitizedString(160, 2),
+  slug: slugSchema,
   en_shortDescription: requiredShort(280, 10),
   ru_shortDescription: requiredShort(280, 10),
   am_shortDescription: requiredShort(280, 10),
@@ -287,6 +299,7 @@ export const packageInputSchema = z.object({
   en_name: sanitizedString(160, 2),
   ru_name: sanitizedString(160, 2),
   am_name: sanitizedString(160, 2),
+  slug: slugSchema,
   durationDays: z.number().int().min(1, 'Duration must be at least 1 day.').max(90),
   en_shortDescription: requiredShort(280, 10),
   ru_shortDescription: requiredShort(280, 10),

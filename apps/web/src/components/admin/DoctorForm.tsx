@@ -22,6 +22,7 @@ export function buildDoctorPayload(values: DoctorFormValues): DoctorInput {
   return {
     firstName: values.firstName,
     lastName: values.lastName,
+    slug: values.slug,
     specialty: values.specialty,
     centerIds: values.centerIds,
     photoUrl: values.photoUrl || undefined,
@@ -55,6 +56,7 @@ export function buildDoctorPayload(values: DoctorFormValues): DoctorInput {
 const emptyValues: DoctorFormValues = {
   firstName: '',
   lastName: '',
+  slug: '',
   specialty: '',
   centerIds: [],
   photoUrl: '',
@@ -85,6 +87,7 @@ function toFormValues(initial: DoctorDto): DoctorFormValues {
   return {
     firstName: initial.firstName,
     lastName: initial.lastName,
+    slug: initial.slug,
     specialty: initial.specialty.id,
     centerIds: initial.centers.map((c) => c.id),
     photoUrl: initial.photoUrl ?? '',
@@ -151,6 +154,16 @@ export function DoctorForm({
           <Input id="lastName" {...register('lastName')} />
         </Field>
       </div>
+
+      <Field
+        label="Slug"
+        htmlFor="slug"
+        required
+        hint="URL path, e.g. aram-grigoryan"
+        error={errors.slug?.message}
+      >
+        <Input id="slug" placeholder="doctor-slug" {...register('slug')} />
+      </Field>
 
       <Field label="Specialty" htmlFor="specialty" required error={errors.specialty?.message}>
         <Select id="specialty" {...register('specialty')}>

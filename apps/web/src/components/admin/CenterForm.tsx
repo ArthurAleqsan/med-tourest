@@ -19,6 +19,7 @@ function buildPayload(values: CenterFormValues): MedicalCenterInput {
     en_name: values.en_name,
     ru_name: values.ru_name,
     am_name: values.am_name,
+    slug: values.slug,
     en_shortDescription: values.en_shortDescription,
     ru_shortDescription: values.ru_shortDescription,
     am_shortDescription: values.am_shortDescription,
@@ -44,6 +45,7 @@ const emptyValues: CenterFormValues = {
   en_name: '',
   ru_name: '',
   am_name: '',
+  slug: '',
   en_shortDescription: '',
   ru_shortDescription: '',
   am_shortDescription: '',
@@ -69,6 +71,7 @@ function toFormValues(initial: MedicalCenterDto): CenterFormValues {
     en_name: initial.en_name,
     ru_name: initial.ru_name,
     am_name: initial.am_name,
+    slug: initial.slug,
     en_shortDescription: initial.en_shortDescription,
     ru_shortDescription: initial.ru_shortDescription,
     am_shortDescription: initial.am_shortDescription,
@@ -115,6 +118,16 @@ export function CenterForm({
   return (
     <form className="space-y-4" onSubmit={handleSubmit((v) => onSubmit(buildPayload(v)))}>
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      <Field
+        label="Slug"
+        htmlFor="c-slug"
+        required
+        hint="URL path, e.g. erebuni-medical-center"
+        error={errors.slug?.message}
+      >
+        <Input id="c-slug" placeholder="my-center-slug" {...register('slug')} />
+      </Field>
 
       {LOCALES.map((lang) => (
         <LanguageSection key={lang} title={LOCALE_SECTION_LABELS[lang]}>

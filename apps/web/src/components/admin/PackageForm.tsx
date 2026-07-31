@@ -43,6 +43,7 @@ function buildPayload(values: PackageFormValues): PackageInput {
     en_name: values.en_name,
     ru_name: values.ru_name,
     am_name: values.am_name,
+    slug: values.slug,
     durationDays: values.durationDays,
     en_shortDescription: values.en_shortDescription,
     ru_shortDescription: values.ru_shortDescription,
@@ -86,6 +87,7 @@ const emptyValues: PackageFormValues = {
   en_name: '',
   ru_name: '',
   am_name: '',
+  slug: '',
   durationDays: 10,
   en_shortDescription: '',
   ru_shortDescription: '',
@@ -120,6 +122,7 @@ function toFormValues(initial: PackageDto): PackageFormValues {
     en_name: initial.en_name,
     ru_name: initial.ru_name,
     am_name: initial.am_name,
+    slug: initial.slug,
     durationDays: initial.durationDays,
     en_shortDescription: initial.en_shortDescription,
     ru_shortDescription: initial.ru_shortDescription,
@@ -178,6 +181,16 @@ export function PackageForm({
   return (
     <form className="space-y-4" onSubmit={handleSubmit((v) => onSubmit(buildPayload(v)))}>
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      <Field
+        label="Slug"
+        htmlFor="p-slug"
+        required
+        hint="URL path, e.g. 10-day-dental-package"
+        error={errors.slug?.message}
+      >
+        <Input id="p-slug" placeholder="my-package-slug" {...register('slug')} />
+      </Field>
 
       {LOCALES.map((lang) => (
         <LanguageSection key={lang} title={LOCALE_SECTION_LABELS[lang]}>

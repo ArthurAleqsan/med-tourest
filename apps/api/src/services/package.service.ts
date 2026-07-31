@@ -6,7 +6,8 @@ import type {
 } from '@mta/shared';
 import { Package } from '../models/Package';
 import { ApiError } from '../utils/ApiError';
-import { uniqueSlug } from '../utils/slugify';
+import { ensureUniqueSlug } from '../utils/ensureUniqueSlug';
+import { slugify } from '../utils/slugify';
 import { toPackageDto } from '../utils/mappers';
 
 export async function listPublicPackages(query: PackageListQuery): Promise<PackageDto[]> {
@@ -48,7 +49,7 @@ export async function getPackageById(id: string): Promise<PackageDto> {
 }
 
 export async function createPackage(input: PackageInput): Promise<PackageDto> {
-  const slug = await uniqueSlug(input.en_name, async (candidate) =>
+  const slug = await ensureUniqueSlug(input.slug, async (candidate) =>
     Boolean(await Package.exists({ slug: candidate })),
   );
   const doc = await Package.create({ ...input, slug });
@@ -58,12 +59,17 @@ export async function createPackage(input: PackageInput): Promise<PackageDto> {
 export async function updatePackage(id: string, input: PackageUpdateInput): Promise<PackageDto> {
   const existing = await Package.findById(id);
   if (!existing) throw ApiError.notFound('Package not found.');
-  if (input.en_name && input.en_name !== existing.en_name) {
-    existing.slug = await uniqueSlug(input.en_name, async (candidate) =>
-      Boolean(await Package.exists({ slug: candidate, _id: { $ne: id } })),
-    );
+  if (input.slug !== undefined) {
+    const next = slugify(input.slug);
+    if (!next) throw ApiError.badRequest('Invalid slug.');
+    if (next !== existing.slug) {
+      const taken = await Package.exists({ slug: next, _id: { $ne: id } });
+      if (taken) throw ApiError.conflict('This slug is already in use.');
+      existing.slug = next;
+    }
   }
-  Object.assign(existing, input);
+  const { slug: _slug, ...rest } = input;
+  Object.assign(existing, rest);
   await existing.save();
   return toPackageDto(existing.toObject());
 }

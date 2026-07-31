@@ -60,9 +60,18 @@ const packageTourFormSchema = z.object({
   am_description: z.string().min(3, 'Tour description is too short.'),
 });
 
+const slugField = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use a URL slug like my-name (lowercase, numbers, hyphens).')
+  .min(2, 'Slug is required.')
+  .max(80);
+
 export const doctorFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required.'),
   lastName: z.string().min(1, 'Last name is required.'),
+  slug: slugField,
   specialty: z.string().min(1, 'Specialty is required.'),
   centerIds: z.array(z.string()).min(1, 'Select at least one medical center.'),
   photoUrl: z.string().url('Must be a valid URL.').or(z.literal('')).optional(),
@@ -93,6 +102,7 @@ export type DoctorFormValues = z.infer<typeof doctorFormSchema>;
 
 export const specialtyFormSchema = z.object({
   ...locNameFields,
+  slug: slugField,
   ...locShortFields,
   ...locDescriptionFields,
   icon: z.string().optional(),
@@ -107,6 +117,7 @@ export type SpecialtyFormValues = z.infer<typeof specialtyFormSchema>;
 
 export const centerFormSchema = z.object({
   ...locNameFields,
+  slug: slugField,
   ...locShortFields,
   ...locDescriptionFields,
   ...locAddressFields,
@@ -123,6 +134,7 @@ export type CenterFormValues = z.infer<typeof centerFormSchema>;
 
 export const packageFormSchema = z.object({
   ...locNameFields,
+  slug: slugField,
   durationDays: z.coerce.number().int().min(1, 'Duration must be at least 1 day.').max(90),
   ...locShortFields,
   ...locDescriptionFields,

@@ -9,7 +9,8 @@ import { Doctor } from '../models/Doctor';
 import { Specialty } from '../models/Specialty';
 import { MedicalCenter } from '../models/MedicalCenter';
 import { ApiError } from '../utils/ApiError';
-import { slugify, uniqueSlug } from '../utils/slugify';
+import { ensureUniqueSlug } from '../utils/ensureUniqueSlug';
+import { slugify } from '../utils/slugify';
 import { toDoctorDto } from '../utils/mappers';
 import { paginated } from '../utils/pagination';
 
@@ -166,8 +167,8 @@ async function ensureCentersExist(ids: string[]): Promise<void> {
 export async function createDoctor(input: DoctorInput): Promise<DoctorDto> {
   await ensureSpecialtyExists(input.specialty);
   await ensureCentersExist(input.centerIds);
-  const { centerIds, ...rest } = input;
-  const slug = await uniqueSlug(`${input.firstName} ${input.lastName}`, async (candidate) =>
+  const { centerIds, slug: rawSlug, ...rest } = input;
+  const slug = await ensureUniqueSlug(rawSlug, async (candidate) =>
     Boolean(await Doctor.exists({ slug: candidate })),
   );
   const created = await Doctor.create({ ...rest, centers: centerIds, slug });
@@ -184,17 +185,17 @@ export async function updateDoctor(id: string, input: DoctorUpdateInput): Promis
   if (input.specialty) await ensureSpecialtyExists(input.specialty);
   if (input.centerIds) await ensureCentersExist(input.centerIds);
 
-  const nameChanged =
-    (input.firstName && input.firstName !== existing.firstName) ||
-    (input.lastName && input.lastName !== existing.lastName);
-  if (nameChanged) {
-    const first = input.firstName ?? existing.firstName;
-    const last = input.lastName ?? existing.lastName;
-    existing.slug = await uniqueSlug(`${first} ${last}`, async (candidate) =>
-      Boolean(await Doctor.exists({ slug: candidate, _id: { $ne: id } })),
-    );
+  if (input.slug !== undefined) {
+    const next = slugify(input.slug);
+    if (!next) throw ApiError.badRequest('Invalid slug.');
+    if (next !== existing.slug) {
+      const taken = await Doctor.exists({ slug: next, _id: { $ne: id } });
+      if (taken) throw ApiError.conflict('This slug is already in use.');
+      existing.slug = next;
+    }
   }
-  const { centerIds, ...rest } = input;
+
+  const { centerIds, slug: _slug, ...rest } = input;
   Object.assign(existing, rest);
   if (centerIds) existing.set('centers', centerIds);
   await existing.save();

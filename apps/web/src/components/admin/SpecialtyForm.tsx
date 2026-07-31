@@ -21,6 +21,7 @@ function buildPayload(values: SpecialtyFormValues): SpecialtyInput {
     en_name: values.en_name,
     ru_name: values.ru_name,
     am_name: values.am_name,
+    slug: values.slug,
     en_shortDescription: values.en_shortDescription,
     ru_shortDescription: values.ru_shortDescription,
     am_shortDescription: values.am_shortDescription,
@@ -40,6 +41,7 @@ const emptyValues: SpecialtyFormValues = {
   en_name: '',
   ru_name: '',
   am_name: '',
+  slug: '',
   en_shortDescription: '',
   ru_shortDescription: '',
   am_shortDescription: '',
@@ -59,6 +61,7 @@ function toFormValues(initial: SpecialtyDto): SpecialtyFormValues {
     en_name: initial.en_name,
     ru_name: initial.ru_name,
     am_name: initial.am_name,
+    slug: initial.slug,
     en_shortDescription: initial.en_shortDescription,
     ru_shortDescription: initial.ru_shortDescription,
     am_shortDescription: initial.am_shortDescription,
@@ -99,6 +102,16 @@ export function SpecialtyForm({
   return (
     <form className="space-y-4" onSubmit={handleSubmit((v) => onSubmit(buildPayload(v)))}>
       {errorMessage && <Alert tone="error">{errorMessage}</Alert>}
+
+      <Field
+        label="Slug"
+        htmlFor="s-slug"
+        required
+        hint="URL path, e.g. plastic-surgery"
+        error={errors.slug?.message}
+      >
+        <Input id="s-slug" placeholder="my-specialty-slug" {...register('slug')} />
+      </Field>
 
       {LOCALES.map((lang) => (
         <LanguageSection key={lang} title={LOCALE_SECTION_LABELS[lang]}>

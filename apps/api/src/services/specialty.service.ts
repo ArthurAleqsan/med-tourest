@@ -2,7 +2,8 @@ import type { SpecialtyDto, SpecialtyInput, SpecialtyListQuery, SpecialtyUpdateI
 import { Specialty } from '../models/Specialty';
 import { Doctor } from '../models/Doctor';
 import { ApiError } from '../utils/ApiError';
-import { slugify, uniqueSlug } from '../utils/slugify';
+import { ensureUniqueSlug } from '../utils/ensureUniqueSlug';
+import { slugify } from '../utils/slugify';
 import { toSpecialtyDto } from '../utils/mappers';
 
 /** Returns a map of specialtyId -> count of active doctors. */
@@ -50,7 +51,7 @@ export async function getSpecialtyById(id: string): Promise<SpecialtyDto> {
 }
 
 export async function createSpecialty(input: SpecialtyInput): Promise<SpecialtyDto> {
-  const slug = await uniqueSlug(input.en_name, async (candidate) =>
+  const slug = await ensureUniqueSlug(input.slug, async (candidate) =>
     Boolean(await Specialty.exists({ slug: candidate })),
   );
   const doc = await Specialty.create({ ...input, slug });
@@ -63,12 +64,17 @@ export async function updateSpecialty(
 ): Promise<SpecialtyDto> {
   const existing = await Specialty.findById(id);
   if (!existing) throw ApiError.notFound('Specialty not found.');
-  if (input.en_name && input.en_name !== existing.en_name) {
-    existing.slug = await uniqueSlug(input.en_name, async (candidate) =>
-      Boolean(await Specialty.exists({ slug: candidate, _id: { $ne: id } })),
-    );
+  if (input.slug !== undefined) {
+    const next = slugify(input.slug);
+    if (!next) throw ApiError.badRequest('Invalid slug.');
+    if (next !== existing.slug) {
+      const taken = await Specialty.exists({ slug: next, _id: { $ne: id } });
+      if (taken) throw ApiError.conflict('This slug is already in use.');
+      existing.slug = next;
+    }
   }
-  Object.assign(existing, input);
+  const { slug: _slug, ...rest } = input;
+  Object.assign(existing, rest);
   await existing.save();
   return toSpecialtyDto(existing.toObject());
 }
