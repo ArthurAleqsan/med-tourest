@@ -49,7 +49,7 @@ export async function getPackageById(id: string): Promise<PackageDto> {
 }
 
 export async function createPackage(input: PackageInput): Promise<PackageDto> {
-  const slug = await ensureUniqueSlug(input.slug, async (candidate) =>
+  const slug = await ensureUniqueSlug(input.slug || input.en_name, async (candidate) =>
     Boolean(await Package.exists({ slug: candidate })),
   );
   const doc = await Package.create({ ...input, slug });

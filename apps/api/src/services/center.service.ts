@@ -64,7 +64,7 @@ export async function getCenterById(id: string): Promise<MedicalCenterDto> {
 }
 
 export async function createCenter(input: MedicalCenterInput): Promise<MedicalCenterDto> {
-  const slug = await ensureUniqueSlug(input.slug, async (candidate) =>
+  const slug = await ensureUniqueSlug(input.slug || input.en_name, async (candidate) =>
     Boolean(await MedicalCenter.exists({ slug: candidate })),
   );
   const doc = await MedicalCenter.create({ ...input, slug });

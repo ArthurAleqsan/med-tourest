@@ -1,10 +1,13 @@
 /** Creates a URL-safe slug from arbitrary text. */
-export function slugify(input: string): string {
-  return input
+export function slugify(input: string | null | undefined): string {
+  if (typeof input !== 'string') return '';
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+
+  return trimmed
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 80);
@@ -15,7 +18,7 @@ export function slugify(input: string): string {
  * already exists. `exists` reports whether a given slug is already taken.
  */
 export async function uniqueSlug(
-  base: string,
+  base: string | null | undefined,
   exists: (slug: string) => Promise<boolean>,
 ): Promise<string> {
   const root = slugify(base) || 'item';

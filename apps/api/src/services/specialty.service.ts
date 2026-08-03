@@ -51,7 +51,7 @@ export async function getSpecialtyById(id: string): Promise<SpecialtyDto> {
 }
 
 export async function createSpecialty(input: SpecialtyInput): Promise<SpecialtyDto> {
-  const slug = await ensureUniqueSlug(input.slug, async (candidate) =>
+  const slug = await ensureUniqueSlug(input.slug || input.en_name, async (candidate) =>
     Boolean(await Specialty.exists({ slug: candidate })),
   );
   const doc = await Specialty.create({ ...input, slug });

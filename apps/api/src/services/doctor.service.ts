@@ -168,8 +168,9 @@ export async function createDoctor(input: DoctorInput): Promise<DoctorDto> {
   await ensureSpecialtyExists(input.specialty);
   await ensureCentersExist(input.centerIds);
   const { centerIds, slug: rawSlug, ...rest } = input;
-  const slug = await ensureUniqueSlug(rawSlug, async (candidate) =>
-    Boolean(await Doctor.exists({ slug: candidate })),
+  const slug = await ensureUniqueSlug(
+    rawSlug || `${input.firstName} ${input.lastName}`,
+    async (candidate) => Boolean(await Doctor.exists({ slug: candidate })),
   );
   const created = await Doctor.create({ ...rest, centers: centerIds, slug });
   const doc = await Doctor.findById(created._id)
