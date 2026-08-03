@@ -89,7 +89,7 @@ export default async function PackageDetailPage({ params }: { params: { slug: st
                 <img
                   src={pkg.photoUrl}
                   alt={name}
-                  className="absolute inset-0 h-full w-full object-cover object-center"
+                  className="absolute inset-0 h-full w-full object-contain object-center"
                 />
               </div>
             )}

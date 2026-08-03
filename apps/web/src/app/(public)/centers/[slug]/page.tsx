@@ -89,7 +89,7 @@ export default async function CenterDetailPage({ params }: { params: { slug: str
                 <img
                   src={center.photoUrl}
                   alt={name}
-                  className="absolute inset-0 h-full w-full object-cover object-center"
+                  className="absolute inset-0 h-full w-full object-contain object-center"
                 />
               </div>
             )}

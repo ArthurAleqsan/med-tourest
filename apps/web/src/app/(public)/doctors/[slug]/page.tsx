@@ -127,7 +127,7 @@ export default async function DoctorProfilePage({ params }: { params: { slug: st
               <img
                 src={doctor.photoUrl || 'https://placehold.co/200x200?text=Doctor'}
                 alt={t(m.doctorProfile.portraitAlt, { name: doctor.fullName })}
-                className="absolute inset-0 h-full w-full object-cover object-center"
+                className="absolute inset-0 h-full w-full object-contain object-center"
               />
             </div>
             <div>

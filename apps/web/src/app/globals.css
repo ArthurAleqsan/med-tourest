@@ -27,8 +27,8 @@
     @apply mt-3 list-disc space-y-1 pl-6 text-navy-700;
   }
 
-  /* Content photos (centers, packages, doctors) always fill their frame. */
-  .media-cover {
-    @apply absolute inset-0 h-full w-full object-cover object-center;
+  /* Content photos (centers, packages, doctors) fit inside their frame. */
+  .media-contain {
+    @apply absolute inset-0 h-full w-full object-contain object-center;
   }
 }

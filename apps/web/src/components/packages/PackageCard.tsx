@@ -21,7 +21,7 @@ export function PackageCard({ pkg }: { pkg: PackageDto }) {
             <img
               src={pkg.photoUrl}
               alt={name}
-              className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
+              className="absolute inset-0 h-full w-full object-contain object-center transition-transform duration-300 group-hover:scale-[1.02]"
               loading="lazy"
             />
           ) : (

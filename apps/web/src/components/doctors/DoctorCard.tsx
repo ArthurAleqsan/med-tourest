@@ -26,7 +26,7 @@ export function DoctorCard({ doctor }: { doctor: DoctorDto }) {
           <img
             src={doctor.photoUrl || 'https://placehold.co/160x160?text=Doctor'}
             alt={t(m.doctors.card.portraitAlt, { name: doctor.fullName })}
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="absolute inset-0 h-full w-full object-contain object-center"
             loading="lazy"
           />
         </div>
