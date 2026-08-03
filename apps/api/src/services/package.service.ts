@@ -6,7 +6,7 @@ import type {
 } from '@mta/shared';
 import { Package } from '../models/Package';
 import { ApiError } from '../utils/ApiError';
-import { ensureUniqueSlug } from '../utils/ensureUniqueSlug';
+import { ensureUniqueSlug, resolveSlugSource } from '../utils/ensureUniqueSlug';
 import { slugify } from '../utils/slugify';
 import { toPackageDto } from '../utils/mappers';
 
@@ -49,7 +49,7 @@ export async function getPackageById(id: string): Promise<PackageDto> {
 }
 
 export async function createPackage(input: PackageInput): Promise<PackageDto> {
-  const slug = await ensureUniqueSlug(input.slug || input.en_name, async (candidate) =>
+  const slug = await ensureUniqueSlug(resolveSlugSource(input), async (candidate) =>
     Boolean(await Package.exists({ slug: candidate })),
   );
   const doc = await Package.create({ ...input, slug });

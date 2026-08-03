@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from 'express';
+import type { Express, Request, RequestHandler, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { env } from './env';
 
@@ -969,13 +969,12 @@ export function setupSwagger(app: Express): void {
   app.get('/api/docs.json', (_req: Request, res: Response) => {
     res.json(openApiSpec);
   });
-  app.use(
-    '/api/docs',
-    swaggerUi.serve,
-    swaggerUi.setup(openApiSpec, {
-      customSiteTitle: 'Medical Tourism Armenia API Docs',
-    }),
-  );
+  // swagger-ui-express typings disagree with current @types/express overloads.
+  const serveHandlers = swaggerUi.serve as unknown as RequestHandler[];
+  const setupHandler = swaggerUi.setup(openApiSpec, {
+    customSiteTitle: 'Medical Tourism Armenia API Docs',
+  }) as unknown as RequestHandler;
+  app.use('/api/docs', ...serveHandlers, setupHandler);
   // eslint-disable-next-line no-console
   if (env.NODE_ENV !== 'test') console.log('Swagger UI available at /api/docs');
 }

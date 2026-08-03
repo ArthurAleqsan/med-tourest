@@ -7,7 +7,7 @@ import type {
 import { MedicalCenter } from '../models/MedicalCenter';
 import { Doctor } from '../models/Doctor';
 import { ApiError } from '../utils/ApiError';
-import { ensureUniqueSlug } from '../utils/ensureUniqueSlug';
+import { ensureUniqueSlug, resolveSlugSource } from '../utils/ensureUniqueSlug';
 import { slugify } from '../utils/slugify';
 import { toMedicalCenterDto } from '../utils/mappers';
 
@@ -64,7 +64,7 @@ export async function getCenterById(id: string): Promise<MedicalCenterDto> {
 }
 
 export async function createCenter(input: MedicalCenterInput): Promise<MedicalCenterDto> {
-  const slug = await ensureUniqueSlug(input.slug || input.en_name, async (candidate) =>
+  const slug = await ensureUniqueSlug(resolveSlugSource(input), async (candidate) =>
     Boolean(await MedicalCenter.exists({ slug: candidate })),
   );
   const doc = await MedicalCenter.create({ ...input, slug });

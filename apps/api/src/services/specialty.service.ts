@@ -2,7 +2,7 @@ import type { SpecialtyDto, SpecialtyInput, SpecialtyListQuery, SpecialtyUpdateI
 import { Specialty } from '../models/Specialty';
 import { Doctor } from '../models/Doctor';
 import { ApiError } from '../utils/ApiError';
-import { ensureUniqueSlug } from '../utils/ensureUniqueSlug';
+import { ensureUniqueSlug, resolveSlugSource } from '../utils/ensureUniqueSlug';
 import { slugify } from '../utils/slugify';
 import { toSpecialtyDto } from '../utils/mappers';
 
@@ -51,7 +51,7 @@ export async function getSpecialtyById(id: string): Promise<SpecialtyDto> {
 }
 
 export async function createSpecialty(input: SpecialtyInput): Promise<SpecialtyDto> {
-  const slug = await ensureUniqueSlug(input.slug || input.en_name, async (candidate) =>
+  const slug = await ensureUniqueSlug(resolveSlugSource(input), async (candidate) =>
     Boolean(await Specialty.exists({ slug: candidate })),
   );
   const doc = await Specialty.create({ ...input, slug });

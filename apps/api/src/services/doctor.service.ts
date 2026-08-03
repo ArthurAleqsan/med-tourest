@@ -9,7 +9,7 @@ import { Doctor } from '../models/Doctor';
 import { Specialty } from '../models/Specialty';
 import { MedicalCenter } from '../models/MedicalCenter';
 import { ApiError } from '../utils/ApiError';
-import { ensureUniqueSlug } from '../utils/ensureUniqueSlug';
+import { ensureUniqueSlug, resolveSlugSource } from '../utils/ensureUniqueSlug';
 import { slugify } from '../utils/slugify';
 import { toDoctorDto } from '../utils/mappers';
 import { paginated } from '../utils/pagination';
@@ -167,10 +167,9 @@ async function ensureCentersExist(ids: string[]): Promise<void> {
 export async function createDoctor(input: DoctorInput): Promise<DoctorDto> {
   await ensureSpecialtyExists(input.specialty);
   await ensureCentersExist(input.centerIds);
-  const { centerIds, slug: rawSlug, ...rest } = input;
-  const slug = await ensureUniqueSlug(
-    rawSlug || `${input.firstName} ${input.lastName}`,
-    async (candidate) => Boolean(await Doctor.exists({ slug: candidate })),
+  const { centerIds, slug: _ignoredSlug, ...rest } = input;
+  const slug = await ensureUniqueSlug(resolveSlugSource(input), async (candidate) =>
+    Boolean(await Doctor.exists({ slug: candidate })),
   );
   const created = await Doctor.create({ ...rest, centers: centerIds, slug });
   const doc = await Doctor.findById(created._id)
