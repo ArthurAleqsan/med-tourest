@@ -22,8 +22,10 @@ export function errorHandler(
   }
 
   // Duplicate key (e.g. unique slug / reference / email).
-  if (err instanceof mongoose.mongo.MongoServerError && err.code === 11000) {
-    const field = Object.keys(err.keyValue ?? { value: '' })[0] ?? 'value';
+  // Duck-type the driver error — `instanceof MongoServerError` is unreliable across bundlers.
+  if (isMongoDuplicateKeyError(err)) {
+    const keyValue = (err as { keyValue?: Record<string, unknown> }).keyValue ?? {};
+    const field = Object.keys(keyValue)[0] ?? 'value';
     sendError(res, 409, 'A record with this value already exists.', [
       { field, message: 'Already exists.' },
     ]);
@@ -44,7 +46,17 @@ export function errorHandler(
   // Unexpected: log server-side, never leak internals to the client.
   logger.error('Unhandled error', {
     message: err instanceof Error ? err.message : 'unknown',
+    name: err instanceof Error ? err.name : undefined,
+    code: typeof err === 'object' && err && 'code' in err ? (err as { code: unknown }).code : undefined,
     stack: isProduction ? undefined : err instanceof Error ? err.stack : undefined,
   });
   sendError(res, 500, 'An unexpected error occurred');
+}
+
+function isMongoDuplicateKeyError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const code = (err as { code?: unknown }).code;
+  if (code === 11000 || code === '11000') return true;
+  if (err instanceof mongoose.mongo.MongoServerError && err.code === 11000) return true;
+  return false;
 }

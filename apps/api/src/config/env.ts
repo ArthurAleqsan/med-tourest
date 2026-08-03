@@ -12,7 +12,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters.'),
   JWT_EXPIRES_IN: z.string().default('1d'),
   CLIENT_URL: z.string().url().default('http://localhost:3000'),
-  /** Optional separate origin for the med.tourest admin SPA (e.g. http://localhost:5173). */
+  /** Optional separate origin for the med.tourest admin SPA (e.g. http://localhost:3001). */
   ADMIN_URL: z.string().url().optional(),
   ADMIN_EMAIL: z.string().email(),
   ADMIN_PASSWORD: z.string().min(8, 'ADMIN_PASSWORD must be at least 8 characters.'),

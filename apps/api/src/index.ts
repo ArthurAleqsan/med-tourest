@@ -1,10 +1,12 @@
 import { createApp } from './app';
 import { env } from './config/env';
 import { connectDatabase, disconnectDatabase } from './config/db';
+import { syncContentIndexes } from './config/syncIndexes';
 import { logger } from './config/logger';
 
 async function bootstrap(): Promise<void> {
   await connectDatabase(env.MONGODB_URI);
+  await syncContentIndexes();
   const app = createApp();
 
   const server = app.listen(env.PORT, () => {

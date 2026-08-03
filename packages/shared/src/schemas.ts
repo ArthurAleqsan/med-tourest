@@ -242,24 +242,28 @@ export const medicalCenterInputSchema = z.object({
   en_city: sanitizedString(120, 2),
   ru_city: sanitizedString(120, 2),
   am_city: sanitizedString(120, 2),
-  phone: sanitizedString(FIELD_LIMITS.phoneNumber.max)
-    .optional()
-    .or(z.literal('').transform(() => undefined)),
-  email: emailSchema.optional().or(z.literal('').transform(() => undefined)),
+  phone: z
+    .union([
+      z.literal('').transform(() => undefined),
+      z
+        .string()
+        .transform((v) => v.replace(/\s+/g, '').trim())
+        .pipe(z.string().min(1).max(FIELD_LIMITS.phoneNumber.max)),
+    ])
+    .optional(),
+  email: z.union([z.literal('').transform(() => undefined), emailSchema]).optional(),
   website: z
-    .string()
-    .trim()
-    .url('Website must be a valid URL.')
-    .max(500)
-    .optional()
-    .or(z.literal('').transform(() => undefined)),
+    .union([
+      z.literal('').transform(() => undefined),
+      z.string().trim().url('Website must be a valid URL.').max(500),
+    ])
+    .optional(),
   photoUrl: z
-    .string()
-    .trim()
-    .url('Photo URL must be a valid URL.')
-    .max(500)
-    .optional()
-    .or(z.literal('').transform(() => undefined)),
+    .union([
+      z.literal('').transform(() => undefined),
+      z.string().trim().url('Photo URL must be a valid URL.').max(500),
+    ])
+    .optional(),
   isActive: z.boolean().default(true),
   displayOrder: z.number().int().min(0).max(9999).default(0),
 });

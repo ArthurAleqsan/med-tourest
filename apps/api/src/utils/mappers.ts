@@ -23,7 +23,13 @@ interface LeanBase {
 }
 
 const id = (value: Types.ObjectId | string): string => String(value);
-const iso = (value: Date): string => new Date(value).toISOString();
+const iso = (value: Date | string | undefined | null): string => {
+  const date = value instanceof Date ? value : new Date(value ?? Date.now());
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toISOString();
+  }
+  return date.toISOString();
+};
 
 type PopulatedSpecialtyRef = {
   _id: Types.ObjectId | string;
