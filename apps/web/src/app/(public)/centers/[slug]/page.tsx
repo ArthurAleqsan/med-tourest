@@ -21,7 +21,9 @@ async function fetchCenter(slug: string): Promise<MedicalCenterDto | null> {
     return await getCenter(slug);
   } catch (error) {
     if (error instanceof ApiRequestError && error.status === 404) return null;
-    throw error;
+    // Avoid hard 500s on reload when the API is down or unreachable.
+    console.error('[centers/[slug]] getCenter failed:', error);
+    return null;
   }
 }
 
@@ -35,18 +37,17 @@ async function fetchCenterDoctors(slug: string): Promise<DoctorDto[]> {
 }
 
 export async function generateMetadata({
-  searchParams,
+  params,
 }: {
-  searchParams: { slug?: string };
+  params: { slug: string };
 }): Promise<Metadata> {
-  const slug = searchParams.slug ?? '';
   const { m, t, locale } = getTranslations();
-  const center = slug ? await fetchCenter(slug) : null;
+  const center = await fetchCenter(params.slug);
   if (!center)
     return buildMetadata({
       title: m.centers.notFoundTitle,
       description: '',
-      path: slug ? `/centers/${slug}` : '/centers',
+      path: `/centers/${params.slug}`,
     });
   const name = loc(center, 'name', locale);
   const city = loc(center, 'city', locale);
@@ -59,18 +60,11 @@ export async function generateMetadata({
   });
 }
 
-export default async function CenterDetailPage({
-  searchParams,
-}: {
-  searchParams: { slug?: string };
-}) {
-  const slug = searchParams.slug;
-  if (!slug) notFound();
-
+export default async function CenterDetailPage({ params }: { params: { slug: string } }) {
   const { m, t, plural, locale } = getTranslations();
-  const center = await fetchCenter(slug);
+  const center = await fetchCenter(params.slug);
   if (!center) notFound();
-  const doctors = await fetchCenterDoctors(slug);
+  const doctors = await fetchCenterDoctors(params.slug);
 
   const name = loc(center, 'name', locale);
   const city = loc(center, 'city', locale);

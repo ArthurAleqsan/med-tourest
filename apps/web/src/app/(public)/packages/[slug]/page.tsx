@@ -20,23 +20,23 @@ async function fetchPackage(slug: string): Promise<PackageDto | null> {
     return await getPackage(slug);
   } catch (error) {
     if (error instanceof ApiRequestError && error.status === 404) return null;
-    throw error;
+    console.error('[packages/[slug]] getPackage failed:', error);
+    return null;
   }
 }
 
 export async function generateMetadata({
-  searchParams,
+  params,
 }: {
-  searchParams: { slug?: string };
+  params: { slug: string };
 }): Promise<Metadata> {
-  const slug = searchParams.slug ?? '';
   const { m, t, locale } = getTranslations();
-  const pkg = slug ? await fetchPackage(slug) : null;
+  const pkg = await fetchPackage(params.slug);
   if (!pkg)
     return buildMetadata({
       title: m.packages.notFoundTitle,
       description: '',
-      path: slug ? `/packages/${slug}` : '/packages',
+      path: `/packages/${params.slug}`,
     });
   const name = loc(pkg, 'name', locale);
   const shortDescription = loc(pkg, 'shortDescription', locale);
@@ -48,16 +48,9 @@ export async function generateMetadata({
   });
 }
 
-export default async function PackageDetailPage({
-  searchParams,
-}: {
-  searchParams: { slug?: string };
-}) {
-  const slug = searchParams.slug;
-  if (!slug) notFound();
-
+export default async function PackageDetailPage({ params }: { params: { slug: string } }) {
   const { m, t, locale } = getTranslations();
-  const pkg = await fetchPackage(slug);
+  const pkg = await fetchPackage(params.slug);
   if (!pkg) notFound();
 
   const name = loc(pkg, 'name', locale);

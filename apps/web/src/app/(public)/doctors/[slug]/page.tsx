@@ -25,23 +25,23 @@ async function fetchDoctor(
     return await getDoctor(slug);
   } catch (error) {
     if (error instanceof ApiRequestError && error.status === 404) return null;
-    throw error;
+    console.error('[doctors/[slug]] getDoctor failed:', error);
+    return null;
   }
 }
 
 export async function generateMetadata({
-  searchParams,
+  params,
 }: {
-  searchParams: { slug?: string };
+  params: { slug: string };
 }): Promise<Metadata> {
-  const slug = searchParams.slug ?? '';
   const { m, t, locale } = getTranslations();
-  const result = slug ? await fetchDoctor(slug) : null;
+  const result = await fetchDoctor(params.slug);
   if (!result)
     return buildMetadata({
       title: m.doctorProfile.notFoundTitle,
       description: '',
-      path: slug ? `/doctors/${slug}` : '/doctors',
+      path: `/doctors/${params.slug}`,
     });
   const { doctor } = result;
   const specialtyName = loc(doctor.specialty, 'name', locale);
@@ -90,16 +90,9 @@ function DetailList({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-export default async function DoctorProfilePage({
-  searchParams,
-}: {
-  searchParams: { slug?: string };
-}) {
-  const slug = searchParams.slug;
-  if (!slug) notFound();
-
+export default async function DoctorProfilePage({ params }: { params: { slug: string } }) {
   const { m, t, locale } = getTranslations();
-  const result = await fetchDoctor(slug);
+  const result = await fetchDoctor(params.slug);
   if (!result) notFound();
   const { doctor, related } = result;
   const price = formatPrice(doctor.consultationPrice, doctor.consultationCurrency, locale);
