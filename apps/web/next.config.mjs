@@ -21,8 +21,7 @@ const nextConfig = {
   },
   /**
    * Browser calls same-origin `/api/v1/*`; Next proxies to the real API.
-   * This avoids baking localhost into client bundles and fixes empty client data
-   * when `/api` is not proxied by nginx.
+   * Bracket chunk URL fixes are handled by `postbuild` + `src/middleware.ts`.
    */
   async rewrites() {
     return [

@@ -1,10 +1,12 @@
 /**
- * Production proxies often return HTTP 400 for Next.js chunk URLs containing
- * `%5Bslug%5D` / `%5Bid%5D` (encoded `[slug]` / `[id]` folders).
+ * Production stacks often return HTTP 400 for Next chunk URLs containing
+ * `%5Bslug%5D` (encoded App Router `[slug]` folders).
  *
- * After `next build`, rename those folders under `.next/static/chunks` and patch
- * only manifests that embed those chunk URLs. Route keys like
- * `/(public)/centers/[slug]/page` are left untouched.
+ * After `next build`:
+ * 1. Copy those folders to `_slug_` under `.next/static/chunks`
+ * 2. Patch manifests so the browser loads the safe paths
+ *
+ * Route keys like `/centers/[slug]/page` are left untouched.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,23 +19,24 @@ const nextRoot = path.join(webRoot, '.next');
 
 const RENAMES = [
   { from: '[slug]', to: '_slug_', encodedFrom: '%5Bslug%5D', encodedTo: '_slug_' },
-  { from: '[id]', to: '_id_', encodedFrom: '%5Bid%5D', encodedTo: '_id_' },
 ];
 
-function renameDynamicDirs(dir) {
+function mirrorDynamicDirs(dir) {
   if (!fs.existsSync(dir)) return 0;
   let count = 0;
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, ent.name);
     if (!ent.isDirectory()) continue;
-    count += renameDynamicDirs(full);
+    count += mirrorDynamicDirs(full);
     const match = RENAMES.find((r) => r.from === ent.name);
     if (!match) continue;
     const dest = path.join(dir, match.to);
-    if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true });
-    fs.renameSync(full, dest);
+    fs.rmSync(dest, { recursive: true, force: true });
+    fs.cpSync(full, dest, { recursive: true });
     count += 1;
-    console.log(`[sanitize-chunks] renamed ${path.relative(webRoot, full)} -> ${match.to}`);
+    console.log(
+      `[sanitize-chunks] mirrored ${path.relative(webRoot, full)} -> ${match.to}`,
+    );
   }
   return count;
 }
@@ -41,8 +44,8 @@ function renameDynamicDirs(dir) {
 function shouldPatchFile(filePath) {
   const base = path.basename(filePath);
   if (base === 'app-build-manifest.json') return true;
+  if (base === 'build-manifest.json') return true;
   if (base.endsWith('_client-reference-manifest.js')) return true;
-  // Client-facing compiled assets under /_next/static
   if (filePath.includes(`${path.sep}static${path.sep}`)) {
     return /\.(js|json|txt|html)$/.test(base);
   }
@@ -55,7 +58,6 @@ function patchEncodedPaths(dir) {
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, ent.name);
     if (ent.isDirectory()) {
-      // Never touch webpack caches / traces
       if (ent.name === 'cache' || ent.name === 'trace') continue;
       files += patchEncodedPaths(full);
       continue;
@@ -81,6 +83,6 @@ if (!fs.existsSync(nextRoot)) {
   process.exit(0);
 }
 
-const renamed = renameDynamicDirs(staticChunks);
+const mirrored = mirrorDynamicDirs(staticChunks);
 const patched = patchEncodedPaths(nextRoot);
-console.log(`[sanitize-chunks] done (dirs=${renamed}, files=${patched})`);
+console.log(`[sanitize-chunks] done (dirs=${mirrored}, files=${patched})`);

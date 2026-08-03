@@ -16,7 +16,6 @@ export class ApiRequestError extends Error {
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
-  token?: string;
   /** Next.js fetch cache control; defaults to no-store for fresh data. */
   cache?: RequestCache;
   signal?: AbortSignal;
@@ -27,11 +26,10 @@ interface RequestOptions {
  * Always returns the `data` payload or throws an `ApiRequestError`.
  */
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, token, cache = 'no-store', signal } = options;
+  const { method = 'GET', body, cache = 'no-store', signal } = options;
 
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   const res = await fetch(`${API_URL}${path}`, {
     method,

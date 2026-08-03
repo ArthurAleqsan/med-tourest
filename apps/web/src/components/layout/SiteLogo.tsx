@@ -6,7 +6,7 @@ type LogoVariant = 'dark' | 'light';
 type LogoSize = 'md' | 'lg';
 
 const SIZE_CLASSES: Record<LogoSize, string> = {
-  // Default for footer / admin
+  // Default for footer
   md: 'h-14 w-14 sm:h-16 sm:w-16',
   // Header — 50% larger than md (84px / 96px)
   lg: 'h-[84px] w-[84px] sm:h-24 sm:w-24',
