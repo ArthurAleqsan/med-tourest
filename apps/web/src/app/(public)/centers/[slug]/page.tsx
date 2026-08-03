@@ -85,13 +85,13 @@ export default async function CenterDetailPage({ params }: { params: { slug: str
 
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
             {center.photoUrl && (
-              <img
-                src={center.photoUrl}
-                alt={name}
-                width={220}
-                height={132}
-                className="h-32 w-full max-w-xs rounded-2xl object-cover shadow-card sm:w-56"
-              />
+              <div className="relative h-40 w-full max-w-md overflow-hidden rounded-2xl bg-navy-100 shadow-card sm:h-36 sm:w-64 sm:max-w-none">
+                <img
+                  src={center.photoUrl}
+                  alt={name}
+                  className="absolute inset-0 h-full w-full object-cover object-center"
+                />
+              </div>
             )}
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-navy-900">{name}</h1>

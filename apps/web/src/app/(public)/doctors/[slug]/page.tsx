@@ -123,13 +123,13 @@ export default async function DoctorProfilePage({ params }: { params: { slug: st
           </nav>
 
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-            <img
-              src={doctor.photoUrl || 'https://placehold.co/200x200?text=Doctor'}
-              alt={t(m.doctorProfile.portraitAlt, { name: doctor.fullName })}
-              width={128}
-              height={128}
-              className="h-32 w-32 rounded-2xl object-cover shadow-card"
-            />
+            <div className="relative h-32 w-32 overflow-hidden rounded-2xl bg-navy-100 shadow-card">
+              <img
+                src={doctor.photoUrl || 'https://placehold.co/200x200?text=Doctor'}
+                alt={t(m.doctorProfile.portraitAlt, { name: doctor.fullName })}
+                className="absolute inset-0 h-full w-full object-cover object-center"
+              />
+            </div>
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-navy-900">
                 {m.common.doctorPrefix} {doctor.fullName}

@@ -22,14 +22,14 @@ export function DoctorCard({ doctor }: { doctor: DoctorDto }) {
   return (
     <Card hover className="flex flex-col">
       <div className="flex items-start gap-4">
-        <img
-          src={doctor.photoUrl || 'https://placehold.co/160x160?text=Doctor'}
-          alt={t(m.doctors.card.portraitAlt, { name: doctor.fullName })}
-          width={72}
-          height={72}
-          className="h-18 w-18 shrink-0 rounded-xl object-cover"
-          loading="lazy"
-        />
+        <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl bg-navy-100">
+          <img
+            src={doctor.photoUrl || 'https://placehold.co/160x160?text=Doctor'}
+            alt={t(m.doctors.card.portraitAlt, { name: doctor.fullName })}
+            className="absolute inset-0 h-full w-full object-cover object-center"
+            loading="lazy"
+          />
+        </div>
         <div className="min-w-0">
           <h3 className="truncate text-lg font-semibold text-navy-900">
             {m.common.doctorPrefix} {doctor.fullName}
