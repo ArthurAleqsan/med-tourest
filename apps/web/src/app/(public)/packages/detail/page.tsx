@@ -25,17 +25,18 @@ async function fetchPackage(slug: string): Promise<PackageDto | null> {
 }
 
 export async function generateMetadata({
-  params,
+  searchParams,
 }: {
-  params: { slug: string };
+  searchParams: { slug?: string };
 }): Promise<Metadata> {
+  const slug = searchParams.slug ?? '';
   const { m, t, locale } = getTranslations();
-  const pkg = await fetchPackage(params.slug);
+  const pkg = slug ? await fetchPackage(slug) : null;
   if (!pkg)
     return buildMetadata({
       title: m.packages.notFoundTitle,
       description: '',
-      path: `/packages/${params.slug}`,
+      path: slug ? `/packages/${slug}` : '/packages',
     });
   const name = loc(pkg, 'name', locale);
   const shortDescription = loc(pkg, 'shortDescription', locale);
@@ -47,9 +48,16 @@ export async function generateMetadata({
   });
 }
 
-export default async function PackageDetailPage({ params }: { params: { slug: string } }) {
+export default async function PackageDetailPage({
+  searchParams,
+}: {
+  searchParams: { slug?: string };
+}) {
+  const slug = searchParams.slug;
+  if (!slug) notFound();
+
   const { m, t, locale } = getTranslations();
-  const pkg = await fetchPackage(params.slug);
+  const pkg = await fetchPackage(slug);
   if (!pkg) notFound();
 
   const name = loc(pkg, 'name', locale);

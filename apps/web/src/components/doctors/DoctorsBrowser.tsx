@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { getCenters, getDoctors, getSpecialties } from '@/lib/api/endpoints';
-import { DoctorCard } from '@/components/doctors/DoctorCard';
+import { DoctorCardClient } from '@/components/doctors/DoctorCardClient';
 import { DoctorCardSkeleton } from '@/components/doctors/DoctorCardSkeleton';
 import { Pagination } from '@/components/ui/Pagination';
 import { Field, Input, Select } from '@/components/ui/form';
@@ -224,7 +224,7 @@ export function DoctorsBrowser() {
           <>
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {doctorsQuery.data.data.map((doctor) => (
-                <DoctorCard key={doctor.id} doctor={doctor} />
+                <DoctorCardClient key={doctor.id} doctor={doctor} />
               ))}
             </div>
             <Pagination

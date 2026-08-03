@@ -26,17 +26,18 @@ async function fetchSpecialty(slug: string): Promise<SpecialtyDto | null> {
 }
 
 export async function generateMetadata({
-  params,
+  searchParams,
 }: {
-  params: { slug: string };
+  searchParams: { slug?: string };
 }): Promise<Metadata> {
+  const slug = searchParams.slug ?? '';
   const { m, t, locale } = getTranslations();
-  const specialty = await fetchSpecialty(params.slug);
+  const specialty = slug ? await fetchSpecialty(slug) : null;
   if (!specialty)
     return buildMetadata({
       title: m.specialtyDetail.notFoundTitle,
       description: '',
-      path: `/specialties/${params.slug}`,
+      path: slug ? `/specialties/${slug}` : '/specialties',
     });
   const name = loc(specialty, 'name', locale);
   const shortDescription = loc(specialty, 'shortDescription', locale);
@@ -47,9 +48,16 @@ export async function generateMetadata({
   });
 }
 
-export default async function SpecialtyDetailPage({ params }: { params: { slug: string } }) {
+export default async function SpecialtyDetailPage({
+  searchParams,
+}: {
+  searchParams: { slug?: string };
+}) {
+  const slug = searchParams.slug;
+  if (!slug) notFound();
+
   const { m, t, plural, locale } = getTranslations();
-  const specialty = await fetchSpecialty(params.slug);
+  const specialty = await fetchSpecialty(slug);
   if (!specialty) notFound();
 
   const name = loc(specialty, 'name', locale);

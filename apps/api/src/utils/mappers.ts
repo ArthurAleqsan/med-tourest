@@ -313,7 +313,9 @@ interface DoctorLean extends LeanBase {
   isActive: boolean;
 }
 
-function specialtyRef(value: PopulatedSpecialtyRef | Types.ObjectId | string): DoctorSpecialtyRef {
+function specialtyRef(
+  value: PopulatedSpecialtyRef | Types.ObjectId | string | null | undefined,
+): DoctorSpecialtyRef {
   if (isPopulatedSpecialtyRef(value)) {
     return {
       id: id(value._id),
@@ -322,6 +324,9 @@ function specialtyRef(value: PopulatedSpecialtyRef | Types.ObjectId | string): D
       am_name: value.am_name,
       slug: value.slug,
     };
+  }
+  if (value == null) {
+    return { id: '', en_name: '', ru_name: '', am_name: '', slug: '' };
   }
   return { id: id(value), en_name: '', ru_name: '', am_name: '', slug: '' };
 }

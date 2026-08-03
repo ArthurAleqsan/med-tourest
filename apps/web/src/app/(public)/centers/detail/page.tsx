@@ -35,17 +35,18 @@ async function fetchCenterDoctors(slug: string): Promise<DoctorDto[]> {
 }
 
 export async function generateMetadata({
-  params,
+  searchParams,
 }: {
-  params: { slug: string };
+  searchParams: { slug?: string };
 }): Promise<Metadata> {
+  const slug = searchParams.slug ?? '';
   const { m, t, locale } = getTranslations();
-  const center = await fetchCenter(params.slug);
+  const center = slug ? await fetchCenter(slug) : null;
   if (!center)
     return buildMetadata({
       title: m.centers.notFoundTitle,
       description: '',
-      path: `/centers/${params.slug}`,
+      path: slug ? `/centers/${slug}` : '/centers',
     });
   const name = loc(center, 'name', locale);
   const city = loc(center, 'city', locale);
@@ -58,11 +59,18 @@ export async function generateMetadata({
   });
 }
 
-export default async function CenterDetailPage({ params }: { params: { slug: string } }) {
+export default async function CenterDetailPage({
+  searchParams,
+}: {
+  searchParams: { slug?: string };
+}) {
+  const slug = searchParams.slug;
+  if (!slug) notFound();
+
   const { m, t, plural, locale } = getTranslations();
-  const center = await fetchCenter(params.slug);
+  const center = await fetchCenter(slug);
   if (!center) notFound();
-  const doctors = await fetchCenterDoctors(params.slug);
+  const doctors = await fetchCenterDoctors(slug);
 
   const name = loc(center, 'name', locale);
   const city = loc(center, 'city', locale);

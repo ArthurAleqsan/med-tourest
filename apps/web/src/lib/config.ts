@@ -1,5 +1,13 @@
+/**
+ * Server components talk to the API directly (internal URL when set).
+ * Browser code always uses same-origin `/api/v1`, rewritten by next.config.mjs.
+ */
 export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000/api/v1';
+  typeof window === 'undefined'
+    ? (process.env.API_INTERNAL_URL ??
+      process.env.NEXT_PUBLIC_API_URL ??
+      'http://localhost:5000/api/v1')
+    : '/api/v1';
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://med.tourest.online';

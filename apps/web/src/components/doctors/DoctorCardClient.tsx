@@ -1,16 +1,19 @@
+'use client';
+
 import type { DoctorDto } from '@mta/shared';
 import { formatPrice } from '@/lib/utils';
-import { getTranslations } from '@/i18n/server';
-import { loc } from '@/lib/localized';
+import { useI18n } from '@/i18n/client';
+import { useLocalized } from '@/lib/useLocalized';
 import { translateLanguage } from '@/lib/languages';
 import { DoctorCardView } from '@/components/doctors/DoctorCardView';
 
-/** Server Component doctor card for RSC pages (avoids `[slug]` client chunks). */
-export function DoctorCard({ doctor }: { doctor: DoctorDto }) {
-  const { m, t, locale } = getTranslations();
+/** Client doctor card for interactive browsers (e.g. DoctorsBrowser). */
+export function DoctorCardClient({ doctor }: { doctor: DoctorDto }) {
+  const { m, t } = useI18n();
+  const { locale, loc } = useLocalized();
   const price = formatPrice(doctor.consultationPrice, doctor.consultationCurrency, locale);
-  const specialtyName = doctor.specialty ? loc(doctor.specialty, 'name', locale) : '';
-  const shortDescription = loc(doctor, 'shortDescription', locale);
+  const specialtyName = doctor.specialty ? loc(doctor.specialty, 'name') : '';
+  const shortDescription = loc(doctor, 'shortDescription');
   const centers = doctor.centers ?? [];
   const primaryCenter = centers[0];
   const extraCenters = centers.length - 1;
@@ -24,7 +27,7 @@ export function DoctorCard({ doctor }: { doctor: DoctorDto }) {
       photoUrl={doctor.photoUrl}
       specialtyName={specialtyName}
       shortDescription={shortDescription}
-      primaryCenterName={primaryCenter ? loc(primaryCenter, 'name', locale) : undefined}
+      primaryCenterName={primaryCenter ? loc(primaryCenter, 'name') : undefined}
       extraCenters={extraCenters}
       experienceLabel={t(m.doctors.card.experience, { years: doctor.yearsOfExperience })}
       languages={languages}

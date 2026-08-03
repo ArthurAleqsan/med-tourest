@@ -30,17 +30,18 @@ async function fetchDoctor(
 }
 
 export async function generateMetadata({
-  params,
+  searchParams,
 }: {
-  params: { slug: string };
+  searchParams: { slug?: string };
 }): Promise<Metadata> {
+  const slug = searchParams.slug ?? '';
   const { m, t, locale } = getTranslations();
-  const result = await fetchDoctor(params.slug);
+  const result = slug ? await fetchDoctor(slug) : null;
   if (!result)
     return buildMetadata({
       title: m.doctorProfile.notFoundTitle,
       description: '',
-      path: `/doctors/${params.slug}`,
+      path: slug ? `/doctors/${slug}` : '/doctors',
     });
   const { doctor } = result;
   const specialtyName = loc(doctor.specialty, 'name', locale);
@@ -89,9 +90,16 @@ function DetailList({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-export default async function DoctorProfilePage({ params }: { params: { slug: string } }) {
+export default async function DoctorProfilePage({
+  searchParams,
+}: {
+  searchParams: { slug?: string };
+}) {
+  const slug = searchParams.slug;
+  if (!slug) notFound();
+
   const { m, t, locale } = getTranslations();
-  const result = await fetchDoctor(params.slug);
+  const result = await fetchDoctor(slug);
   if (!result) notFound();
   const { doctor, related } = result;
   const price = formatPrice(doctor.consultationPrice, doctor.consultationCurrency, locale);

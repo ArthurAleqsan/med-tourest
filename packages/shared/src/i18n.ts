@@ -21,29 +21,41 @@ export type LocalizedArrayFields<T extends string> = {
 
 /** Pick a localized string with English fallback. */
 export function pickLocalized(
-  record: Partial<Record<`${ContentLocale}_${string}`, string | undefined>> &
-    Record<string, unknown>,
+  record:
+    | (Partial<Record<`${ContentLocale}_${string}`, string | undefined>> & Record<string, unknown>)
+    | null
+    | undefined,
   field: string,
   locale: UiLocale | ContentLocale | string,
 ): string {
+  if (!record || typeof record !== 'object') return '';
   const content = uiLocaleToContent(locale);
   const preferred = record[`${content}_${field}`];
   if (typeof preferred === 'string' && preferred.trim()) return preferred;
   const en = record[`en_${field}`];
   if (typeof en === 'string') return en;
+  // Legacy single-locale CMS fields (pre-multilingual migration).
+  const legacy = record[field];
+  if (typeof legacy === 'string') return legacy;
   return '';
 }
 
 /** Pick a localized string array with English fallback. */
 export function pickLocalizedArray(
-  record: Partial<Record<`${ContentLocale}_${string}`, string[] | undefined>> &
-    Record<string, unknown>,
+  record:
+    | (Partial<Record<`${ContentLocale}_${string}`, string[] | undefined>> &
+        Record<string, unknown>)
+    | null
+    | undefined,
   field: string,
   locale: UiLocale | ContentLocale | string,
 ): string[] {
+  if (!record || typeof record !== 'object') return [];
   const content = uiLocaleToContent(locale);
   const preferred = record[`${content}_${field}`];
   if (Array.isArray(preferred) && preferred.length > 0) return preferred;
   const en = record[`en_${field}`];
-  return Array.isArray(en) ? en : [];
+  if (Array.isArray(en)) return en;
+  const legacy = record[field];
+  return Array.isArray(legacy) ? (legacy as string[]) : [];
 }

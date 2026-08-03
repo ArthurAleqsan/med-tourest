@@ -8,7 +8,8 @@ export function useLocalized() {
   const { locale } = useI18n();
   return {
     locale,
-    loc: (record: object, field: string) => loc(record, field, locale),
-    locArray: (record: object, field: string) => locArray(record, field, locale),
+    loc: (record: object | null | undefined, field: string) => loc(record, field, locale),
+    locArray: (record: object | null | undefined, field: string) =>
+      locArray(record, field, locale),
   };
 }
