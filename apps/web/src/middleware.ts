@@ -6,6 +6,9 @@ import type { NextRequest } from 'next/server';
  * `%5Bslug%5D` / `/[slug]/`. Those folders are mirrored to `_slug_` by
  * `postbuild` — rewrite requests there.
  *
+ * Also maps legacy `(public)/...` chunk paths (pre route-group removal) to
+ * the flattened `app/...` layout.
+ *
  * Skip in development: Next serves literal `[slug]` chunks and `_slug_`
  * mirrors do not exist until a production build.
  */
@@ -15,18 +18,20 @@ export function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+  let nextPath = pathname;
 
-  const needsRewrite = pathname.includes('%5Bslug%5D') || pathname.includes('/[slug]/');
-  if (!needsRewrite) return NextResponse.next();
+  // Legacy route-group chunk paths from older deploys / cached clients.
+  nextPath = nextPath.replace('/app/(public)/', '/app/');
+  nextPath = nextPath.replace('/app/%28public%29/', '/app/');
 
-  const rewritten = pathname
+  nextPath = nextPath
     .replaceAll('%5Bslug%5D', '_slug_')
     .replaceAll('/[slug]/', '/_slug_/');
 
-  if (rewritten === pathname) return NextResponse.next();
+  if (nextPath === pathname) return NextResponse.next();
 
   const url = request.nextUrl.clone();
-  url.pathname = rewritten;
+  url.pathname = nextPath;
   return NextResponse.rewrite(url);
 }
 
